@@ -42,7 +42,7 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{headerShown: false}}>
                 <Stack.Screen name='bottomTabs' component={MyTabs} />
-                <Stack.Screen name='AddProduct' component={AddProductScreen} />
+                <Stack.Screen name='addProduct' component={AddProductScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     )
