@@ -1,13 +1,38 @@
-import { View, Text, TextInput, ScrollView } from 'react-native'
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable } from 'react-native'
 import React from 'react'
 import HeaderBar from '../components/HeaderBar'
 
 const AddProductScreen = () => {
+  const [selectedColors, setSelectedColors] = React.useState([]);
+
+  const commonColors = [
+    { name: 'Red', value: '#FF0000' },
+    { name: 'Blue', value: '#0000FF' },
+    { name: 'Green', value: '#00FF00' },
+    { name: 'Black', value: '#000000' },
+    { name: 'White', value: '#FFFFFF' },
+    { name: 'Gray', value: '#808080' },
+    { name: 'Yellow', value: '#FFFF00' },
+    { name: 'Orange', value: '#FFA500' },
+    { name: 'Purple', value: '#800080' },
+    { name: 'Pink', value: '#FFC0CB' },
+    { name: 'Brown', value: '#A52A2A' },
+    { name: 'Navy', value: '#000080' },
+  ];
+
+  const toggleColor = (color) => {
+    if (selectedColors.includes(color.name)) {
+      setSelectedColors(selectedColors.filter(c => c !== color.name));
+    } else {
+      setSelectedColors([...selectedColors, color.name]);
+    }
+  };
+
   return (
     <View className='flex-1 bg-gray-50'>
-      <HeaderBar title='Add Product'/>
+      <HeaderBar title='Add Product' />
       <ScrollView className='px-4 py-4'>
-        
+
         {/* Product Name */}
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Name</Text>
@@ -45,22 +70,50 @@ const AddProductScreen = () => {
           />
         </View>
 
-
-        {/*stock  */}
+        {/* Stock */}
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Stock</Text>
           <TextInput
-              placeholder='0'
-              keyboardType='decimal-pad'
-              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1'
-              placeholderTextColor={'#9CA3AF'}
-            />
+            placeholder='0'
+            keyboardType='decimal-pad'
+            className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1'
+            placeholderTextColor={'#9CA3AF'}
+          />
+          <TouchableOpacity>
+            <Text>Hello</Text>
+          </TouchableOpacity>
         </View>
 
-
-{/* {color} */}
-
-
+        {/* Colors */}
+        <View className='mb-6'>
+          <Text className='text-lg font-semibold mb-2 text-gray-800'>Colors</Text>
+          <View className='flex-row flex-wrap'>
+            {commonColors.map((color, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => toggleColor(color)}
+                activeOpacity={0.7}
+                className={`flex-row items-center border-2 rounded-full px-3 py-2 mr-2 mb-2 ${
+                  selectedColors.includes(color.name) 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-300 bg-white'
+                }`}
+              >
+                <View 
+                  style={{ backgroundColor: color.value }}
+                  className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                />
+                <Text className={
+                  selectedColors.includes(color.name) 
+                    ? 'text-blue-600 font-medium' 
+                    : 'text-gray-700'
+                }>
+                  {color.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
       </ScrollView>
     </View>
@@ -68,29 +121,3 @@ const AddProductScreen = () => {
 }
 
 export default AddProductScreen
-
-// {
-//   // Basic Info
-//   id: "prod_001",
-//   name: "Wireless Bluetooth Headphones",
-//   description: "High-quality wireless headphones with noise cancellation",
-//   price: 59.99,
-//   originalPrice: 99.99,
-//   category: "electronics",
-  
-//   // Media
-//   images: [
-//     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-//     "https://images.unsplash.com/photo-1484704849700-f032a568e944"
-//   ],
-  
-//   // Inventory
-//   stock: 25,
-//   colors: ["Black", "White", "Blue"],
-//   sizes: ["One Size"],
-  
-//   // Additional
-//   brand: "SoundMax",
-//   features: ["Noise Cancellation", "30hr Battery", "Fast Charge"],
-//   tags: ["bestseller", "wireless", "audio"]
-// }

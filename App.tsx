@@ -1,4 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
+import 'react-native-reanimated';
 import { StyleSheet, Text, View } from 'react-native';
 import "./global.css"
 import AppNavigator from './src/navigation/AppNavigator'
