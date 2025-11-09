@@ -3,7 +3,7 @@ import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 
-const HeaderBar = ({title}) => {
+const HeaderBar = ({title, iconName, size=24}) => {
     const navigation = useNavigation()
     return (
         <View className="  py-4  flex-row items-center">
@@ -12,7 +12,7 @@ const HeaderBar = ({title}) => {
                 onPress={() => navigation.goBack()}
                 className="mr-3"
             >
-                <Ionicons name='arrow-back' size={24} color='black' />
+                <Ionicons name={iconName} size={size} color='black' />
             </TouchableOpacity>
             
             {/* Page Title */}

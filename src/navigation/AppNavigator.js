@@ -6,6 +6,8 @@ import ProfileScreen from '../screens/ProfileScreen'
 import AddProductScreen from '../screens/AddProductScreen';
 import { Ionicons } from "@expo/vector-icons";
 import CartScreen from "../screens/CartScreen";
+import Category from "../screens/Category";
+import { Platform } from "react-native";
 
 
 const Tab = createBottomTabNavigator()
@@ -43,6 +45,18 @@ export default function AppNavigator() {
             <Stack.Navigator screenOptions={{headerShown: false}}>
                 <Stack.Screen name='bottomTabs' component={MyTabs} />
                 <Stack.Screen name='addProduct' component={AddProductScreen} />
+                <Stack.Screen name="category" component={Category} 
+        options={{
+          presentation: 'modal',
+          cardStyle: {
+            marginTop: Platform.OS === 'android' ? 75 : 0,
+            backgroundColor: 'white',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+
+          },
+          cardOverlayEnabled: true,
+        }}/>
             </Stack.Navigator>
         </NavigationContainer>
     )

@@ -1,9 +1,13 @@
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable } from 'react-native'
 import React from 'react'
 import HeaderBar from '../components/HeaderBar'
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const AddProductScreen = () => {
   const [selectedColors, setSelectedColors] = React.useState([]);
+  console.log(selectedColors);
+  const navigation = useNavigation()
 
   const commonColors = [
     { name: 'Red', value: '#FF0000' },
@@ -28,9 +32,13 @@ const AddProductScreen = () => {
     }
   };
 
+  const handleCategoryInput = () => {
+    navigation.navigate('category')
+  }
+
   return (
-    <View className='flex-1 bg-gray-50'>
-      <HeaderBar title='Add Product' />
+    <View className='flex-1 bg-gray-50 '>
+      <HeaderBar iconName='arrow-back' title='Add Product' size={24}  />
       <ScrollView className='px-4 py-4'>
 
         {/* Product Name */}
@@ -79,9 +87,7 @@ const AddProductScreen = () => {
             className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1'
             placeholderTextColor={'#9CA3AF'}
           />
-          <TouchableOpacity>
-            <Text>Hello</Text>
-          </TouchableOpacity>
+
         </View>
 
         {/* Colors */}
@@ -93,19 +99,18 @@ const AddProductScreen = () => {
                 key={index}
                 onPress={() => toggleColor(color)}
                 activeOpacity={0.7}
-                className={`flex-row items-center border-2 rounded-full px-3 py-2 mr-2 mb-2 ${
-                  selectedColors.includes(color.name) 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 bg-white'
-                }`}
+                className={`flex-row items-center border-2 rounded-full px-3 py-2 mr-2 mb-2 ${selectedColors.includes(color.name)
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 bg-white'
+                  }`}
               >
-                <View 
+                <View
                   style={{ backgroundColor: color.value }}
                   className="w-4 h-4 rounded-full mr-2 border border-gray-300"
                 />
                 <Text className={
-                  selectedColors.includes(color.name) 
-                    ? 'text-blue-600 font-medium' 
+                  selectedColors.includes(color.name)
+                    ? 'text-blue-600 font-medium'
                     : 'text-gray-700'
                 }>
                   {color.name}
@@ -113,6 +118,17 @@ const AddProductScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* category */}
+        <View>
+          <Text className='text-lg font-semibold mb-2 text-gray-800'>Select Category</Text>
+          <TouchableOpacity
+            onPress={handleCategoryInput}
+            className='border border-gray-400 p-4 rounded-xl flex-row items-center justify-between w-full'>
+            <Text className='text-gray-700 flex-1'>Select product category</Text>
+            <Ionicons name='chevron-forward-outline' size={24} color='gray' />
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
