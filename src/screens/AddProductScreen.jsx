@@ -45,6 +45,23 @@ const AddProductScreen = () => {
           />
         </View>
 
+
+        {/*stock  */}
+        <View className='mb-6'>
+          <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Stock</Text>
+          <TextInput
+              placeholder='0'
+              keyboardType='decimal-pad'
+              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1'
+              placeholderTextColor={'#9CA3AF'}
+            />
+        </View>
+
+
+{/* {color} */}
+
+
+
       </ScrollView>
     </View>
   )
