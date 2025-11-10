@@ -41,6 +41,7 @@ const AddProductScreen = () => {
       }))
     }
   }, [selectedColors])
+  
 
   const handleAdd = () => {
 
@@ -53,10 +54,9 @@ const AddProductScreen = () => {
       selectedCategory,
       selectedColors
     }
-
-    const newData = [...dataS, newProduct]
-    setDataS(newData)
-    console.log(newData, 'from add product');
+    console.log('New Product:', newProduct);
+    setDataS(prev => [...prev, newProduct]);;
+    
     
   }
 
