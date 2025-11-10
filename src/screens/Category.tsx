@@ -4,24 +4,23 @@ import HeaderBar from '../components/HeaderBar'
 import { categories } from '../constants/categories'
 import CategoryCard from '../components/CategoryCard'
 import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
+
+type RootStackParamList = {
+    addProduct: { selectedCategory: string } | undefined;
+    category: undefined;
+}
+
+type CategoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'category'>;
+
 const Category = () => {
+    const navigation = useNavigation<CategoryScreenNavigationProp>()
 
-    const navigation = useNavigation()
-
-    const handleCategory = (item) => {
+    const handleCategory = (item: string) => {
         console.log('Selected category:', item);
-        
-        // ✅ Correct navigation - pass as params
         navigation.navigate('addProduct', { 
             selectedCategory: item 
         });
-        
-        // OR if you want to go back to previous screen with data:
-        // navigation.goBack();
-        // Then in AddProductScreen, get the category from route.params
-    }
-
-
     }
     return (
 

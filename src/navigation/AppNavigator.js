@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import CartScreen from "../screens/CartScreen";
 import Category from "../screens/Category";
 import { Platform } from "react-native";
+import ColorSelection from "../screens/ColorSelection";
 
 
 const Tab = createBottomTabNavigator()
@@ -16,24 +17,24 @@ const Stack = createStackNavigator()
 
 function MyTabs() {
     return (
-        <Tab.Navigator screenOptions={{headerShown: false}}>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
             <Tab.Screen name="Home" component={HomeScreen} options={{
-                tabBarIcon: ({color , size, focused}) => (
+                tabBarIcon: ({ color, size, focused }) => (
                     <Ionicons name="home" size={size} color={color} />
                 )
             }} />
-             <Tab.Screen name='Cart' component={CartScreen} options={{
-                tabBarIcon: ({color, size,focused}) => (
-                    <Ionicons name="cart" size={size} color={color}/>
+            <Tab.Screen name='Cart' component={CartScreen} options={{
+                tabBarIcon: ({ color, size, focused }) => (
+                    <Ionicons name="cart" size={size} color={color} />
 
                 )
-            }}/>
+            }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
-                tabBarIcon: ({color, size,focused}) => (
-                    <Ionicons name="person" size={size} color={color}/>
+                tabBarIcon: ({ color, size, focused }) => (
+                    <Ionicons name="person" size={size} color={color} />
 
                 )
-            }}/>
+            }} />
         </Tab.Navigator>
 
     )
@@ -42,21 +43,34 @@ function MyTabs() {
 export default function AppNavigator() {
     return (
         <NavigationContainer>
-            <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name='bottomTabs' component={MyTabs} />
                 <Stack.Screen name='addProduct' component={AddProductScreen} />
-                <Stack.Screen name="category" component={Category} 
-        options={{
-          presentation: 'modal',
-          cardStyle: {
-            marginTop: Platform.OS === 'android' ? 75 : 0,
-            backgroundColor: 'white',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
+                <Stack.Screen name="category" component={Category}
+                    options={{
+                        presentation: 'modal',
+                        cardStyle: {
+                            marginTop: Platform.OS === 'android' ? 75 : 0,
+                            backgroundColor: 'white',
+                            borderTopLeftRadius: 20,
+                            borderTopRightRadius: 20,
 
-          },
-          cardOverlayEnabled: true,
-        }}/>
+                        },
+                        cardOverlayEnabled: true,
+                    }} />
+
+                <Stack.Screen name="colorSelection" component={ColorSelection}
+                    options={{
+                        presentation: 'modal',
+                        cardStyle: {
+                            marginTop: Platform.OS === 'android' ? 75 : 0,
+                            backgroundColor: 'white',
+                            borderTopLeftRadius: 20,
+                            borderTopRightRadius: 20,
+
+                        },
+                        cardOverlayEnabled: true,
+                    }} />
             </Stack.Navigator>
         </NavigationContainer>
     )

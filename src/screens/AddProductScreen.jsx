@@ -1,44 +1,47 @@
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import HeaderBar from '../components/HeaderBar'
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const AddProductScreen = () => {
-  const [selectedColors, setSelectedColors] = React.useState([]);
-  console.log(selectedColors);
+
+  const route = useRoute()
   const navigation = useNavigation()
+  const selectedCategory = route.params?.selectedCategory
+  const selectedColors = route.params?.selectedColors
+  // console.log(selectedColors);
+  const [productData, setProductData] = React.useState({
+    name: '',
+    price: '',
+    description: '',
+    colors: selectedColors || [], 
+    categories: [],
+    
+  })
 
-  const commonColors = [
-    { name: 'Red', value: '#FF0000' },
-    { name: 'Blue', value: '#0000FF' },
-    { name: 'Green', value: '#00FF00' },
-    { name: 'Black', value: '#000000' },
-    { name: 'White', value: '#FFFFFF' },
-    { name: 'Gray', value: '#808080' },
-    { name: 'Yellow', value: '#FFFF00' },
-    { name: 'Orange', value: '#FFA500' },
-    { name: 'Purple', value: '#800080' },
-    { name: 'Pink', value: '#FFC0CB' },
-    { name: 'Brown', value: '#A52A2A' },
-    { name: 'Navy', value: '#000080' },
-  ];
-
-  const toggleColor = (color) => {
-    if (selectedColors.includes(color.name)) {
-      setSelectedColors(selectedColors.filter(c => c !== color.name));
-    } else {
-      setSelectedColors([...selectedColors, color.name]);
+  useEffect(() => {
+    if (selectedColors) {
+      setProductData(prev => ({
+        ...prev,
+        colors: selectedColors
+      }))
     }
-  };
+  }, [selectedColors])
 
+
+  
   const handleCategoryInput = () => {
     navigation.navigate('category')
   }
 
+  const handleColorSelection = () => {
+    navigation.navigate('colorSelection')
+  }
+
   return (
     <View className='flex-1 bg-gray-50 '>
-      <HeaderBar iconName='arrow-back' title='Add Product' size={24}  />
+      <HeaderBar iconName='arrow-back' title='Add Product' size={24} />
       <ScrollView className='px-4 py-4'>
 
         {/* Product Name */}
@@ -90,35 +93,45 @@ const AddProductScreen = () => {
 
         </View>
 
-        {/* Colors */}
+        {/* Colors Section - UPDATED */}
         <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Colors</Text>
-          <View className='flex-row flex-wrap'>
-            {commonColors.map((color, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => toggleColor(color)}
-                activeOpacity={0.7}
-                className={`flex-row items-center border-2 rounded-full px-3 py-2 mr-2 mb-2 ${selectedColors.includes(color.name)
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-300 bg-white'
-                  }`}
-              >
-                <View
-                  style={{ backgroundColor: color.value }}
-                  className="w-4 h-4 rounded-full mr-2 border border-gray-300"
-                />
-                <Text className={
-                  selectedColors.includes(color.name)
-                    ? 'text-blue-600 font-medium'
-                    : 'text-gray-700'
-                }>
-                  {color.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+                    <Text className='text-lg font-semibold mb-2 text-gray-800'>Colors</Text>
+                    
+                    {/* Selected Colors Preview */}
+                    {productData.colors.length > 0 && (
+                        <View className='mb-3'>
+                            <Text className='text-gray-600 mb-2'>Selected colors:</Text>
+                            <View className='flex-row flex-wrap'>
+                                {productData.colors.map((color, index) => (
+                                    <View 
+                                        key={index}
+                                        className='flex-row items-center bg-blue-100 rounded-full px-3 py-2 mr-2 mb-2'
+                                    >
+                                        <View 
+                                            style={{ backgroundColor: color.value }}
+                                            className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                                        />
+                                        <Text className='text-blue-800 text-sm'>{color.name}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+                    
+                    {/* Color Selection Button */}
+                    <TouchableOpacity
+                        onPress={handleColorSelection}
+                        className='border border-gray-400 p-4 rounded-xl flex-row items-center justify-between w-full bg-white'
+                    >
+                        <Text className='text-gray-700 flex-1'>
+                            {productData.colors.length > 0 
+                                ? `${productData.colors.length} color(s) selected`
+                                : 'Select product colors'
+                            }
+                        </Text>
+                        <Ionicons name='chevron-forward-outline' size={24} color='gray' />
+                    </TouchableOpacity>
+                </View>
 
         {/* category */}
         <View>
@@ -126,7 +139,7 @@ const AddProductScreen = () => {
           <TouchableOpacity
             onPress={handleCategoryInput}
             className='border border-gray-400 p-4 rounded-xl flex-row items-center justify-between w-full'>
-            <Text className='text-gray-700 flex-1'>Select product category</Text>
+            <Text className='text-gray-700 flex-1'>{selectedCategory || 'Select product category'}</Text>
             <Ionicons name='chevron-forward-outline' size={24} color='gray' />
           </TouchableOpacity>
         </View>
