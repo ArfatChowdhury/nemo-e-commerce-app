@@ -5,6 +5,8 @@ import { categories } from '../constants/categories'
 import CategoryCard from '../components/CategoryCard'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { useDispatch } from 'react-redux'
+import { setCategory } from '../Store/slices/productFormSlice';
 
 type RootStackParamList = {
     addProduct: { selectedCategory: string } | undefined;
@@ -15,12 +17,11 @@ type CategoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'cat
 
 const Category = () => {
     const navigation = useNavigation<CategoryScreenNavigationProp>()
-
+    const dispatch = useDispatch()
     const handleCategory = (item: string) => {
         console.log('Selected category:', item);
-        navigation.navigate('addProduct', { 
-            selectedCategory: item 
-        });
+        dispatch(setCategory(item));
+        navigation.goBack();
     }
     return (
 

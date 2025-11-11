@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import HeaderBar from '../components/HeaderBar'
 import { useNavigation } from '@react-navigation/native'
 import ColorCard from '../components/ColorCard'
+import { useDispatch } from 'react-redux'
+import { setColors } from '../Store/slices/productFormSlice'
 
 // Color data with hex codes
 const colors = [
@@ -23,6 +25,8 @@ const colors = [
 
 const ColorSelection = () => {
     const navigation = useNavigation()
+
+    const dispatch = useDispatch()
     
     const [selectedColors, setSelectedColors] = useState([])
 
@@ -40,9 +44,8 @@ const ColorSelection = () => {
 
     const saveColors = () => {
         // console.log('Selected colors:', selectedColors)
-        navigation.navigate('addProduct', { 
-            selectedColors: selectedColors 
-        })
+       dispatch(setColors(selectedColors))
+       navigation.goBack()
     }
 
     return (
