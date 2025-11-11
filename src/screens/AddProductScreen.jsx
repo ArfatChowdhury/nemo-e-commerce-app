@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import HeaderBar from '../components/HeaderBar'
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Button } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField, setColors, setCategory, resetForm, addProduct } from '../Store/slices/productFormSlice';
+import NewImagePicker from '../components/ImagePicker';
 
 const AddProductScreen = () => {
 
@@ -22,17 +23,17 @@ const AddProductScreen = () => {
     if (route.params?.selectedColors) {
       dispatch(setColors(route.params.selectedColors))
     }
-    
+
   }, [route.params])
 
 
   const handleAdd = () => {
-    dispatch(addProduct(formData)) 
-    dispatch(resetForm()) 
-    console.log('All products:', productsList) 
-}
+    dispatch(addProduct(formData))
+    dispatch(resetForm())
+    console.log('All products:', productsList)
+  }
 
-  
+
 
 
 
@@ -83,41 +84,59 @@ const AddProductScreen = () => {
         {/* Description */}
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Description</Text>
-          <TextInput
-            placeholder='Describe your product...'
-            multiline
-            numberOfLines={4}
-            className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base h-32'
-            placeholderTextColor={'#9CA3AF'}
-            textAlignVertical='top'
-            value={formData.description}
-            onChangeText={(text) => dispatch(updateField({ field: 'description', value: text }))}
-          />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            <TextInput
+              placeholder='Describe your product...'
+              multiline
+              numberOfLines={4}
+              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base h-32'
+              placeholderTextColor={'#9CA3AF'}
+              textAlignVertical='top'
+              value={formData.description}
+              onChangeText={(text) => dispatch(updateField({ field: 'description', value: text }))}
+            />
+          </KeyboardAvoidingView>
+        </View>
+
+        {/* Image option  */}
+        <View className='mb-6'>
+          <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Images</Text>
+          <NewImagePicker />
         </View>
 
         {/*Brand name*/}
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Brand name</Text>
-          <TextInput
-            placeholder='e.g., Nokia, JBL, Samsung'
-            className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base'
-            placeholderTextColor={'#9CA3AF'}
-            value={formData.brandName}
-            onChangeText={(text) => dispatch(updateField({ field: 'brandName', value: text }))}
-          />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            <TextInput
+              placeholder='e.g., Nokia, JBL, Samsung'
+              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base'
+              placeholderTextColor={'#9CA3AF'}
+              value={formData.brandName}
+              onChangeText={(text) => dispatch(updateField({ field: 'brandName', value: text }))}
+            />
+          </KeyboardAvoidingView>
         </View>
 
         {/* Stock */}
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Stock</Text>
-          <TextInput
-            placeholder='0'
-            keyboardType='decimal-pad'
-            className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1 w-full'
-            placeholderTextColor={'#9CA3AF'}
-            value={formData.stock}
-            onChangeText={(text) => dispatch(updateField({ field: 'stock', value: text }))}
-          />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+            <TextInput
+              placeholder='0'
+              keyboardType='decimal-pad'
+              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1 w-full'
+              placeholderTextColor={'#9CA3AF'}
+              value={formData.stock}
+              onChangeText={(text) => dispatch(updateField({ field: 'stock', value: text }))}
+            />
+          </KeyboardAvoidingView>
 
         </View>
 
@@ -175,7 +194,9 @@ const AddProductScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <Button onPress={handleAdd} title='Add Product' />
+        <TouchableOpacity onPress={handleAdd} className='py-4 px-4 bg-blue-400 mb-5 mt-4'>
+          <Text>ADD PRODUCT</Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </View>

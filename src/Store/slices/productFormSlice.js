@@ -48,7 +48,6 @@ const productFormSlice = createSlice({
             state.images = state.images.filter((_, index) => index !== action.payload)
         },
         setMainImage: (state, action) => {
-            
             const index = action.payload
             const imageToPromote = state.images[index]
             const otherImages = state.images.filter((_, i) => i !== index)
@@ -57,5 +56,5 @@ const productFormSlice = createSlice({
     }
 })
 
-export const { updateField, setColors, setCategory, resetForm, addProduct } = productFormSlice.actions;
+export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage } = productFormSlice.actions;
 export default productFormSlice.reducer
