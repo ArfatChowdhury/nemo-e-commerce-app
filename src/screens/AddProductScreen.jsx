@@ -28,9 +28,28 @@ const AddProductScreen = () => {
 
 
   const handleAdd = () => {
-    dispatch(addProduct(formData))
-    dispatch(resetForm())
-    console.log('All products:', productsList)
+
+    fetch('http://localhost:5000/products',{
+      method: 'POST',
+      headers: {
+        'content-type' : 'application/json' 
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(res => res.json())
+    .then(data => 
+      console.log('data in the frontend' , data)
+    )
+
+
+
+
+
+
+
+    // dispatch(addProduct(formData))
+    // dispatch(resetForm())
+    // console.log('All products:', productsList)
   }
 
 
