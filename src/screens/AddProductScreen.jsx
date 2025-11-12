@@ -7,59 +7,107 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateField, setColors, setCategory, resetForm, addProduct } from '../Store/slices/productFormSlice';
 import NewImagePicker from '../components/ImagePicker';
 
+
+const COMPUTER_IP = '192.168.1.2'; 
+
 const BASE_URL = Platform.select({
-  android: 'http://10.0.2.2:5000',
-  ios: 'http://127.0.0.1:5000',
-  default: 'http://localhost:5000',
+  android: `http://${COMPUTER_IP}:5000`,  
+  ios: `http://${COMPUTER_IP}:5000`,      
+  default: `http://${COMPUTER_IP}:5000`,
 });
 
 const AddProductScreen = () => {
 
-  const route = useRoute()
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const formData = useSelector(state => state.productForm)
-  const productsList = useSelector(state => state.productForm.products)
-
-  const [checkData, setCheckData] = useState([])
 
 
-  useEffect(() => {
-    if (route.params?.selectedColors) {
-      dispatch(setColors(route.params.selectedColors))
+
+
+  const validateForm = (formData) => {
+    if (!formData.productName?.trim()) {
+      return 'Product name is required';
     }
 
-  }, [route.params])
+    if (!formData.brandName?.trim()) {
+      return 'Brand name is required';
+    }
+
+    if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
+      return 'Please enter a valid price';
+    }
+
+    if (!formData.stock || isNaN(formData.stock) || formData.stock < 0) {
+      return 'Please enter valid stock quantity';
+    }
+
+    if (!formData.category?.trim()) {
+      return 'Category is required';
+    }
+
+    if (!formData.images || formData.images.length === 0) {
+      return 'Please add at least one image';
+    }
+
+    return null;
+  };
+
+
 
 
   const handleAdd = async () => {
     try {
+
+      const error = validateForm(formData);
+      if (error) {
+        alert(error);
+        return;
+      }
+
       console.log('📤 Sending product to backend:', formData);
-      
-      const response = await fetch(`${BASE_URL}/products`, {
+      console.log('🌐 Using BASE_URL:', BASE_URL);
+      console.log('📱 Platform:', Platform.OS);
+
+      const url = `${BASE_URL}/products`;
+      console.log('🔗 Full URL:', url);
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'  // ✅ Capital 'C' in Content-Type
+          'Content-Type': 'application/json' 
         },
         body: JSON.stringify(formData)
       });
-  
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Server response error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-  
+
       const data = await response.json();
       console.log('✅ Product saved successfully:', data);
-      
-      // ✅ Clear form after successful save
+
+     
       dispatch(resetForm());
+
       
-      // Optional: Show success message
       alert('Product added successfully!');
-      
+
     } catch (error) {
       console.error('❌ Error saving product:', error);
-      alert('Failed to save product. Check if server is running.');
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      let errorMessage = 'Failed to save product. ';
+      if (error.message.includes('Network request failed')) {
+        errorMessage += `\n\nNetwork error detected.\n\nPlease check:\n1. Backend server is running on ${BASE_URL}\n2. If testing on physical device, use your computer's IP address instead\n3. Both devices are on the same network`;
+      } else {
+        errorMessage += error.message;
+      }
+      
+      alert(errorMessage);
     }
   }
 
