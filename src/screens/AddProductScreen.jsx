@@ -3,10 +3,15 @@ import React, { useEffect, useState } from 'react'
 import HeaderBar from '../components/HeaderBar'
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Button } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField, setColors, setCategory, resetForm, addProduct } from '../Store/slices/productFormSlice';
 import NewImagePicker from '../components/ImagePicker';
+
+const BASE_URL = Platform.select({
+  android: 'http://10.0.2.2:5000',
+  ios: 'http://127.0.0.1:5000',
+  default: 'http://localhost:5000',
+});
 
 const AddProductScreen = () => {
 
@@ -27,29 +32,35 @@ const AddProductScreen = () => {
   }, [route.params])
 
 
-  const handleAdd = () => {
-
-    fetch('http://localhost:5000/products',{
-      method: 'POST',
-      headers: {
-        'content-type' : 'application/json' 
-      },
-      body: JSON.stringify(formData)
-    })
-    .then(res => res.json())
-    .then(data => 
-      console.log('data in the frontend' , data)
-    )
-
-
-
-
-
-
-
-    // dispatch(addProduct(formData))
-    // dispatch(resetForm())
-    // console.log('All products:', productsList)
+  const handleAdd = async () => {
+    try {
+      console.log('📤 Sending product to backend:', formData);
+      
+      const response = await fetch(`${BASE_URL}/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'  // ✅ Capital 'C' in Content-Type
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('✅ Product saved successfully:', data);
+      
+      // ✅ Clear form after successful save
+      dispatch(resetForm());
+      
+      // Optional: Show success message
+      alert('Product added successfully!');
+      
+    } catch (error) {
+      console.error('❌ Error saving product:', error);
+      alert('Failed to save product. Check if server is running.');
+    }
   }
 
 
