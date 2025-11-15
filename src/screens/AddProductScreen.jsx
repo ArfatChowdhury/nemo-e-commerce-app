@@ -6,15 +6,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateField, setColors, setCategory, resetForm, addProduct } from '../Store/slices/productFormSlice';
 import NewImagePicker from '../components/ImagePicker';
+import { API_BASE_URL } from '../constants/apiConfig';
 
-
-const COMPUTER_IP = '192.168.1.2'; 
-
-const BASE_URL = Platform.select({
-  android: `http://${COMPUTER_IP}:5000`,  
-  ios: `http://${COMPUTER_IP}:5000`,      
-  default: `http://${COMPUTER_IP}:5000`,
-});
+const BASE_URL = API_BASE_URL;
 
 const AddProductScreen = () => {
 
@@ -46,9 +40,9 @@ const AddProductScreen = () => {
       return 'Category is required';
     }
 
-    if (!formData.images || formData.images.length === 0) {
-      return 'Please add at least one image';
-    }
+    // if (!formData.images || formData.images.length === 0) {
+    //   return 'Please add at least one image';
+    // }
 
     return null;
   };
@@ -72,12 +66,46 @@ const AddProductScreen = () => {
       const url = `${BASE_URL}/products`;
       console.log('🔗 Full URL:', url);
 
+      // Create FormData for multipart/form-data upload (required for images)
+      const formDataToSend = new FormData();
+      
+      // Add text fields
+      formDataToSend.append('productName', formData.productName);
+      formDataToSend.append('brandName', formData.brandName);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('category', formData.category);
+      
+      // Add colors as JSON string
+      if (formData.colors && formData.colors.length > 0) {
+        formDataToSend.append('colors', JSON.stringify(formData.colors));
+      }
+      
+      // Add images as files
+      if (formData.images && formData.images.length > 0) {
+        formData.images.forEach((imageUri, index) => {
+          // Extract filename from URI or use a default
+          const filename = imageUri.split('/').pop() || `image_${index}.jpg`;
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : 'image/jpeg';
+          
+          formDataToSend.append('images', {
+            uri: imageUri,
+            type: type,
+            name: filename,
+          });
+        });
+      }
+
+      console.log('📦 FormData prepared with', formData.images?.length || 0, 'images');
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json' 
+          // Don't set Content-Type header - let fetch set it with boundary for FormData
         },
-        body: JSON.stringify(formData)
+        body: formDataToSend
       });
 
       if (!response.ok) {
