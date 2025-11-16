@@ -13,7 +13,9 @@ const productFormSlice = createSlice({
         colors: [],
         category: '',
         images: [],
-        products: []
+        products: [],
+        loading: false,
+        error: null
     },
     reducers: {
         updateField: (state, action) => {
@@ -52,9 +54,38 @@ const productFormSlice = createSlice({
             const imageToPromote = state.images[index]
             const otherImages = state.images.filter((_, i) => i !== index)
             state.images = [imageToPromote, ...otherImages]
+        },
+        setLoading: (state, action) => {
+            state.loading = action.payload
+        },
+        setError: (state, action) =>{
+            state.error = action.payload
+        },
+        setProducts: (state, action) =>{
+            state.products = action.payload
         }
     }
 })
+
+export const fetchProducts = () => {
+    return async(dispatch) =>{
+        try{
+            dispatch(setLoading(true))
+            dispatch(setError(null))
+
+            const response = await fetch('https://backend-of-nemo.vercel.app/products')
+            const data = await response.json()
+            dispatch(setProducts(data.data || data))
+        }catch{
+            console.error('Error fetching products:', error)
+            dispatch(setError(error.message))
+        }finally{
+            dispatch(setLoading(false))
+        }
+    }
+}
+
+
 
 export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage } = productFormSlice.actions;
 export default productFormSlice.reducer

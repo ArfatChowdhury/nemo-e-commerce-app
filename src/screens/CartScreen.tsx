@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { API_BASE_URL } from '../constants/apiConfig'
 
 const CartScreen = () => {
   const [products, setProducts] = useState<Product[]>([])

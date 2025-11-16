@@ -32,3 +32,31 @@
 //   },
 //   plugins: [],
 // }
+
+
+
+{
+    // Basic Info
+    id: "prod_001",
+    name: "Wireless Bluetooth Headphones",
+    description: "High-quality wireless headphones with noise cancellation",
+    price: 59.99,
+    originalPrice: 99.99,
+    category: "electronics",
+    
+    // Media
+    images: [
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944"
+    ],
+    
+    // Inventory
+    stock: 25,
+    colors: ["Black", "White", "Blue"],
+    sizes: ["One Size"],
+    
+    // Additional
+    brand: "SoundMax",
+    features: ["Noise Cancellation", "30hr Battery", "Fast Charge"],
+    tags: ["bestseller", "wireless", "audio"]
+  }
