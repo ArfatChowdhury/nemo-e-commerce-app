@@ -87,5 +87,5 @@ export const fetchProducts = () => {
 
 
 
-export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage } = productFormSlice.actions;
+export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage, setProducts, setLoading, setError } = productFormSlice.actions;
 export default productFormSlice.reducer

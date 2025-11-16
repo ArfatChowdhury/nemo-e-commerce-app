@@ -1,78 +1,145 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import HeaderBar from '../components/HeaderBar'
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateField, setColors, setCategory, resetForm, addProduct } from '../Store/slices/productFormSlice';
+import { updateField, setColors, setCategory, resetForm, addProduct, setImages } from '../Store/slices/productFormSlice';
 import NewImagePicker from '../components/ImagePicker';
-import { API_BASE_URL } from '../constants/apiConfig';
+import { API_BASE_URL, IMGBB_API_KEY } from '../constants/apiConfig';
+import { fetchProducts } from '../Store/slices/productFormSlice';
 
 const BASE_URL = API_BASE_URL;
 
-const AddProductScreen = () => {
 
+const AddProductScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const formData = useSelector(state => state.productForm)
 
+  // Upload image to ImgBB
+  const uploadImageToImgBB = async (imageUri) => {
+    try {
+      console.log('📤 Uploading image to ImgBB...');
+      
+      const formData = new FormData();
+      const filename = imageUri.split('/').pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image`;
+      
+      formData.append('image', {
+        uri: imageUri,
+        type: type,
+        name: filename,
+      });
 
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Image uploaded successfully:', data.data.url);
+        return data.data.url;
+      } else {
+        throw new Error(data.error?.message || 'ImgBB upload failed');
+      }
+    } catch (error) {
+      console.error('❌ ImgBB upload error:', error);
+      throw error;
+    }
+  };
+
+  // Upload all images and get URLs
+  const uploadAllImages = async (imageUris) => {
+    try {
+      const uploadedUrls = [];
+      
+      for (const imageUri of imageUris) {
+        const imageUrl = await uploadImageToImgBB(imageUri);
+        if (imageUrl) {
+          uploadedUrls.push(imageUrl);
+        }
+      }
+      
+      return uploadedUrls;
+    } catch (error) {
+      console.error('❌ Error uploading images:', error);
+      throw error;
+    }
+  };
 
   const validateForm = (formData) => {
     if (!formData.productName?.trim()) {
       return 'Product name is required';
     }
-
+    
     if (!formData.brandName?.trim()) {
       return 'Brand name is required';
     }
-
+    
     if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
       return 'Please enter a valid price';
     }
-
+    
     if (!formData.stock || isNaN(formData.stock) || formData.stock < 0) {
       return 'Please enter valid stock quantity';
     }
-
+    
     if (!formData.category?.trim()) {
       return 'Category is required';
     }
-
-    // if (!formData.images || formData.images.length === 0) {
-    //   return 'Please add at least one image';
-    // }
-
+    
+    if (!formData.images || formData.images.length === 0) {
+      return 'Please add at least one image';
+    }
+    
     return null;
   };
 
-
-
-
   const handleAdd = async () => {
     try {
-
       const error = validateForm(formData);
       if (error) {
         alert(error);
         return;
       }
 
-      console.log('📤 Sending product to backend:', formData);
-      console.log('🌐 Using BASE_URL:', BASE_URL);
-      console.log('📱 Platform:', Platform.OS);
+      console.log('📤 Starting product creation process...');
+      console.log('📝 Form data:', formData);
 
-      const url = `${BASE_URL}/products`;
-      console.log('🔗 Full URL:', url);
+      // Step 1: Upload images to ImgBB
+      console.log('🖼️ Uploading images to ImgBB...');
+      const imageUrls = await uploadAllImages(formData.images);
+      
+      if (imageUrls.length === 0) {
+        alert('Failed to upload images. Please try again.');
+        return;
+      }
 
+      console.log('✅ Images uploaded:', imageUrls);
 
-      const response = await fetch(url, {
+      // Step 2: Prepare product data with image URLs
+      const productData = {
+        ...formData,
+        images: imageUrls, // Replace local URIs with web URLs
+        createdAt: new Date().toISOString()
+      };
+
+      console.log('📦 Sending product to backend:', productData);
+
+      // Step 3: Send to backend
+      const response = await fetch(`${BASE_URL}/products`, {
         method: 'POST',
-          headers: {
-            'content-type': 'application/json'
-          },
-        body: JSON.stringify(formData)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData)
       });
 
       if (!response.ok) {
@@ -84,32 +151,30 @@ const AddProductScreen = () => {
       const data = await response.json();
       console.log('✅ Product saved successfully:', data);
 
-     
+      // Step 4: Refresh products list and reset form
+      dispatch(fetchProducts());
       dispatch(resetForm());
-
       
-      alert('Product added successfully!');
-
+      Alert.alert('Success', 'Product added successfully!');
+      
+      // Optional: Navigate back
+      // navigation.goBack();
 
     } catch (error) {
       console.error('❌ Error saving product:', error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error stack:', error.stack);
       
       let errorMessage = 'Failed to save product. ';
       if (error.message.includes('Network request failed')) {
-        errorMessage += `\n\nNetwork error detected.\n\nPlease check:\n1. Backend server is running on ${BASE_URL}\n2. If testing on physical device, use your computer's IP address instead\n3. Both devices are on the same network`;
+        errorMessage += 'Network error - please check your internet connection.';
+      } else if (error.message.includes('ImgBB')) {
+        errorMessage += 'Image upload failed. Please try again.';
       } else {
         errorMessage += error.message;
       }
       
-      alert(errorMessage);
+      Alert.alert('Error', errorMessage);
     }
-  }
-
-
-
-
+  };
 
   const handleCategoryInput = () => {
     navigation.navigate('category')
@@ -118,8 +183,6 @@ const AddProductScreen = () => {
   const handleColorSelection = () => {
     navigation.navigate('colorSelection')
   }
-
-
 
   return (
     <View className='flex-1 bg-gray-50 '>
@@ -135,7 +198,6 @@ const AddProductScreen = () => {
             placeholderTextColor={'#9CA3AF'}
             value={formData.productName}
             onChangeText={(text) => dispatch(updateField({ field: 'productName', value: text }))}
-
           />
         </View>
 
@@ -178,6 +240,11 @@ const AddProductScreen = () => {
         <View className='mb-6'>
           <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Images</Text>
           <NewImagePicker />
+          {formData.images.length > 0 && (
+            <Text className='text-green-600 text-sm mt-2'>
+              {formData.images.length} image(s) selected - will be uploaded to cloud
+            </Text>
+          )}
         </View>
 
         {/*Brand name*/}
@@ -211,11 +278,7 @@ const AddProductScreen = () => {
               onChangeText={(text) => dispatch(updateField({ field: 'stock', value: text }))}
             />
           </KeyboardAvoidingView>
-
         </View>
-
-
-
 
         {/* Colors Section*/}
         <View className='mb-6'>
@@ -268,8 +331,8 @@ const AddProductScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={handleAdd} className='py-4 px-4 bg-blue-400 mb-5 mt-4'>
-          <Text>ADD PRODUCT</Text>
+        <TouchableOpacity onPress={handleAdd} className='py-4 px-4 bg-blue-400 mb-5 mt-4 rounded-lg'>
+          <Text className='text-white text-center font-semibold text-lg'>ADD PRODUCT</Text>
         </TouchableOpacity>
 
       </ScrollView>
