@@ -39,7 +39,7 @@ const ProductCard = ({ item, onPress }) => {
 
   return (
     <TouchableOpacity 
-      className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-40"
+      className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-48"
       onPress={() => onPress(item)}
       accessible={true}
       accessibilityLabel={getAccessibilityLabel()}
@@ -60,7 +60,7 @@ const ProductCard = ({ item, onPress }) => {
               source={{ 
                 uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png' 
               }} 
-              className="w-full h-32 rounded-t-xl"
+              className="w-full h-full rounded-t-xl"
               resizeMode="cover"
               onError={handleImageError}
               onLoad={handleImageLoad}
