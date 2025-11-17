@@ -1,343 +1,333 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Pressable, KeyboardAvoidingView, Platform, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import HeaderBar from '../components/HeaderBar'
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateField, setColors, setCategory, resetForm, addProduct, setImages } from '../Store/slices/productFormSlice';
-import NewImagePicker from '../components/ImagePicker';
-import { API_BASE_URL, IMGBB_API_KEY } from '../constants/apiConfig';
-import { fetchProducts } from '../Store/slices/productFormSlice';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
+import React from "react";
+import HeaderBar from "../components/HeaderBar";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateField,
+  resetForm,
+  fetchProducts,
+} from "../Store/slices/productFormSlice";
+import NewImagePicker from "../components/ImagePicker";
+import { API_BASE_URL, IMGBB_API_KEY } from "../constants/apiConfig";
+import { SafeAreaView } from "react-native-safe-area-context";
+import InputBlock from "../components/InputBlocks";
 
 const BASE_URL = API_BASE_URL;
 
-
 const AddProductScreen = () => {
-  const navigation = useNavigation()
-  const dispatch = useDispatch()
-  const formData = useSelector(state => state.productForm)
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const formData = useSelector((state) => state.productForm);
 
-  // Upload image to ImgBB
-  const uploadImageToImgBB = async (imageUri) => {
+  // ImgBB Upload
+  const uploadImageToImgBB = async (uri) => {
     try {
-      console.log('📤 Uploading image to ImgBB...');
-      
-      const formData = new FormData();
-      const filename = imageUri.split('/').pop();
-      const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : `image`;
-      
-      formData.append('image', {
-        uri: imageUri,
-        type: type,
-        name: filename,
+      const data = new FormData();
+      const fileName = uri.split("/").pop();
+      const match = /\.(\w+)$/.exec(fileName);
+      const type = match ? `image/${match[1]}` : "image";
+
+      data.append("image", {
+        uri,
+        name: fileName,
+        type,
       });
 
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('✅ Image uploaded successfully:', data.data.url);
-        return data.data.url;
-      } else {
-        throw new Error(data.error?.message || 'ImgBB upload failed');
-      }
-    } catch (error) {
-      console.error('❌ ImgBB upload error:', error);
-      throw error;
-    }
-  };
-
-  // Upload all images and get URLs
-  const uploadAllImages = async (imageUris) => {
-    try {
-      const uploadedUrls = [];
-      
-      for (const imageUri of imageUris) {
-        const imageUrl = await uploadImageToImgBB(imageUri);
-        if (imageUrl) {
-          uploadedUrls.push(imageUrl);
+      const res = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        {
+          method: "POST",
+          body: data,
+          headers: { "Content-Type": "multipart/form-data" },
         }
-      }
-      
-      return uploadedUrls;
-    } catch (error) {
-      console.error('❌ Error uploading images:', error);
-      throw error;
+      );
+
+      const json = await res.json();
+      if (json.success) return json.data.url;
+      throw new Error(json.error?.message ?? "Upload failed");
+    } catch (err) {
+      console.log("ImgBB error:", err);
+      throw err;
     }
   };
 
-  const validateForm = (formData) => {
-    if (!formData.productName?.trim()) {
-      return 'Product name is required';
+  const uploadAllImages = async (images) => {
+    const urls = [];
+    for (const img of images) {
+      const uploaded = await uploadImageToImgBB(img);
+      urls.push(uploaded);
     }
-    
-    if (!formData.brandName?.trim()) {
-      return 'Brand name is required';
-    }
-    
-    if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
-      return 'Please enter a valid price';
-    }
-    
-    if (!formData.stock || isNaN(formData.stock) || formData.stock < 0) {
-      return 'Please enter valid stock quantity';
-    }
-    
-    if (!formData.category?.trim()) {
-      return 'Category is required';
-    }
-    
-    if (!formData.images || formData.images.length === 0) {
-      return 'Please add at least one image';
-    }
-    
+    return urls;
+  };
+
+  // Validation
+  const validateForm = () => {
+    if (!formData.productName.trim()) return "Product name required";
+    if (!formData.brandName.trim()) return "Brand name required";
+    if (!formData.price || isNaN(formData.price)) return "Valid price required";
+    if (!formData.stock || isNaN(formData.stock))
+      return "Valid stock required";
+    if (!formData.category.trim()) return "Category is required";
+    if (!formData.images.length) return "At least one image required";
     return null;
   };
 
+  // Add product
+  // const handleAdd = async () => {
+  //   const error = validateForm();
+  //   if (error) return Alert.alert("Error", error);
+
+  //   try {
+  //     const uploadedUrls = await uploadAllImages(formData.images);
+
+  //     const productData = {
+  //       ...formData,
+  //       images: uploadedUrls,
+  //       createdAt: new Date().toISOString(),
+  //     };
+
+  //     const res = await fetch(`${BASE_URL}/products`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(productData),
+  //     });
+
+  //     const json = await res.json();
+  //     if (!res.ok) throw new Error(JSON.stringify(json));
+
+  //     dispatch(fetchProducts());
+  //     dispatch(resetForm());
+  //     Alert.alert("Success", "Product added successfully!");
+  //   } catch (err) {
+  //     Alert.alert("Error", err.message);
+  //   }
+  // };
+
   const handleAdd = async () => {
+    const error = validateForm();
+    if (error) return Alert.alert("Error", error);
+  
     try {
-      const error = validateForm(formData);
-      if (error) {
-        alert(error);
-        return;
-      }
-
-      console.log('📤 Starting product creation process...');
-      console.log('📝 Form data:', formData);
-
-      // Step 1: Upload images to ImgBB
-      console.log('🖼️ Uploading images to ImgBB...');
-      const imageUrls = await uploadAllImages(formData.images);
+      console.log('📤 Starting product creation...');
       
-      if (imageUrls.length === 0) {
-        alert('Failed to upload images. Please try again.');
-        return;
-      }
-
-      console.log('✅ Images uploaded:', imageUrls);
-
-      // Step 2: Prepare product data with image URLs
+      // Upload images first
+      console.log('🖼️ Uploading images to ImgBB...');
+      const uploadedUrls = await uploadAllImages(formData.images);
+      console.log('✅ Images uploaded:', uploadedUrls);
+  
+      // Prepare product data
       const productData = {
         ...formData,
-        images: imageUrls, // Replace local URIs with web URLs
-        createdAt: new Date().toISOString()
+        images: uploadedUrls,
+        createdAt: new Date().toISOString(),
       };
-
-      console.log('📦 Sending product to backend:', productData);
-
-      // Step 3: Send to backend
+  
+      console.log('📦 Sending to server:', productData);
+  
+      // Make the API request with better error handling
       const response = await fetch(`${BASE_URL}/products`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(productData),
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Server response error:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+  
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
+        throw new Error(`Server error: ${response.status} - ${response.statusText}`);
       }
-
-      const data = await response.json();
-      console.log('✅ Product saved successfully:', data);
-
-      // Step 4: Refresh products list and reset form
+  
+      // Parse JSON only if it's actually JSON
+      const json = await response.json();
+      
+      if (!response.ok) {
+        console.log('❌ Server error response:', json);
+        throw new Error(json.message || `HTTP error! status: ${response.status}`);
+      }
+  
+      console.log('✅ Product created successfully:', json);
+  
+      // Success
       dispatch(fetchProducts());
       dispatch(resetForm());
+      Alert.alert("Success", "Product added successfully!");
       
-      Alert.alert('Success', 'Product added successfully!');
-      
-      // Optional: Navigate back
-      // navigation.goBack();
-
-    } catch (error) {
-      console.error('❌ Error saving product:', error);
-      
-      let errorMessage = 'Failed to save product. ';
-      if (error.message.includes('Network request failed')) {
-        errorMessage += 'Network error - please check your internet connection.';
-      } else if (error.message.includes('ImgBB')) {
-        errorMessage += 'Image upload failed. Please try again.';
-      } else {
-        errorMessage += error.message;
-      }
-      
-      Alert.alert('Error', errorMessage);
+    } catch (err) {
+      console.log('❌ Error adding product:', err);
+      Alert.alert(
+        "Error", 
+        err.message || "Failed to add product. Please check your connection and try again."
+      );
     }
   };
 
-  const handleCategoryInput = () => {
-    navigation.navigate('category')
-  }
-
-  const handleColorSelection = () => {
-    navigation.navigate('colorSelection')
-  }
-
   return (
-    <View className='flex-1 bg-gray-50 '>
-      <HeaderBar iconName='arrow-back' title='Add Product' size={24} />
-      <ScrollView className='px-4 py-4'>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+      <HeaderBar iconName="arrow-back" title="Add Product" />
 
-        {/* Product Name */}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Name</Text>
-          <TextInput
-            placeholder='e.g., Wireless Bluetooth Headphones'
-            className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base'
-            placeholderTextColor={'#9CA3AF'}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={{ paddingHorizontal: 16, paddingTop: 12 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Product Name */}
+          <InputBlock
+            label="Product Name"
+            placeholder="e.g., Wireless Bluetooth Headphones"
             value={formData.productName}
-            onChangeText={(text) => dispatch(updateField({ field: 'productName', value: text }))}
+            onChange={(v) =>
+              dispatch(updateField({ field: "productName", value: v }))
+            }
           />
-        </View>
 
-        {/* Price */}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Price</Text>
-          <View className='flex-row items-center'>
-            <Text className='text-lg text-gray-600 mr-2'>$</Text>
-            <TextInput
-              placeholder='0.00'
-              keyboardType='decimal-pad'
-              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1'
-              placeholderTextColor={'#9CA3AF'}
-              value={formData.price}
-              onChangeText={(text) => dispatch(updateField({ field: 'price', value: text }))}
-            />
-          </View>
-        </View>
-
-        {/* Description */}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Description</Text>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-            <TextInput
-              placeholder='Describe your product...'
-              multiline
-              numberOfLines={4}
-              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base h-32'
-              placeholderTextColor={'#9CA3AF'}
-              textAlignVertical='top'
-              value={formData.description}
-              onChangeText={(text) => dispatch(updateField({ field: 'description', value: text }))}
-            />
-          </KeyboardAvoidingView>
-        </View>
-
-        {/* Image option  */}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Images</Text>
-          <NewImagePicker />
-          {formData.images.length > 0 && (
-            <Text className='text-green-600 text-sm mt-2'>
-              {formData.images.length} image(s) selected - will be uploaded to cloud
+          {/* Price */}
+          <View style={{ marginBottom: 20 }}>
+            <Text className="text-lg font-semibold mb-2 text-gray-800">
+              Price
             </Text>
-          )}
-        </View>
+            <View className="flex-row items-center bg-white border border-gray-300 rounded-lg px-3 py-3">
+              <Text className="text-lg text-gray-600 mr-2">$</Text>
+              <TextInput
+                placeholder="0.00"
+                keyboardType="decimal-pad"
+                className="flex-1 text-base"
+                value={formData.price}
+                onChangeText={(v) =>
+                  dispatch(updateField({ field: "price", value: v }))
+                }
+              />
+            </View>
+          </View>
 
-        {/*Brand name*/}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Brand name</Text>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-            <TextInput
-              placeholder='e.g., Nokia, JBL, Samsung'
-              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base'
-              placeholderTextColor={'#9CA3AF'}
-              value={formData.brandName}
-              onChangeText={(text) => dispatch(updateField({ field: 'brandName', value: text }))}
-            />
-          </KeyboardAvoidingView>
-        </View>
+          {/* Description */}
+          <InputBlock
+            label="Description"
+            placeholder="Describe your product..."
+            multiline
+            height={120}
+            value={formData.description}
+            onChange={(v) =>
+              dispatch(updateField({ field: "description", value: v }))
+            }
+          />
 
-        {/* Stock */}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Product Stock</Text>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-            <TextInput
-              placeholder='0'
-              keyboardType='decimal-pad'
-              className='bg-white border border-gray-300 rounded-lg px-4 py-3 text-base flex-1 w-full'
-              placeholderTextColor={'#9CA3AF'}
-              value={formData.stock}
-              onChangeText={(text) => dispatch(updateField({ field: 'stock', value: text }))}
-            />
-          </KeyboardAvoidingView>
-        </View>
+          {/* Images */}
+          <View style={{ marginBottom: 24 }}>
+            <Text className="text-lg font-semibold mb-2 text-gray-800">
+              Product Images
+            </Text>
+            <NewImagePicker />
+            {formData.images.length > 0 && (
+              <Text className="text-green-600 text-sm mt-1">
+                {formData.images.length} image(s) selected
+              </Text>
+            )}
+          </View>
 
-        {/* Colors Section*/}
-        <View className='mb-6'>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Colors</Text>
+          {/* Brand */}
+          <InputBlock
+            label="Brand Name"
+            placeholder="e.g., JBL, Samsung"
+            value={formData.brandName}
+            onChange={(v) =>
+              dispatch(updateField({ field: "brandName", value: v }))
+            }
+          />
 
-          {/* Selected Colors Preview */}
-          {formData.colors.length > 0 && (
-            <View className='mb-3'>
-              <Text className='text-gray-600 mb-2'>Selected colors:</Text>
-              <View className='flex-row flex-wrap'>
-                {formData.colors.map((color, index) => (
+          {/* Stock */}
+          <InputBlock
+            label="Product Stock"
+            placeholder="0"
+            keyboardType="numeric"
+            value={formData.stock}
+            onChange={(v) =>
+              dispatch(updateField({ field: "stock", value: v }))
+            }
+          />
+
+          {/* Colors */}
+          <View className="mb-6">
+            <Text className="text-lg font-semibold mb-2 text-gray-800">
+              Colors
+            </Text>
+
+            {formData.colors.length > 0 && (
+              <View className="flex-row flex-wrap mb-2">
+                {formData.colors.map((c, i) => (
                   <View
-                    key={index}
-                    className='flex-row items-center bg-blue-100 rounded-full px-3 py-2 mr-2 mb-2'
+                    key={i}
+                    className="flex-row items-center bg-blue-100 rounded-full px-3 py-2 mr-2 mb-2"
                   >
                     <View
-                      style={{ backgroundColor: color.value }}
-                      className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                      style={{ backgroundColor: c.value }}
+                      className="w-4 h-4 rounded-full mr-2 border"
                     />
-                    <Text className='text-blue-800 text-sm'>{color.name}</Text>
+                    <Text className="text-blue-800">{c.name}</Text>
                   </View>
                 ))}
               </View>
-            </View>
-          )}
+            )}
 
-          {/* Color Selection Button */}
-          <TouchableOpacity
-            onPress={handleColorSelection}
-            className='border border-gray-400 p-4 rounded-xl flex-row items-center justify-between w-full bg-white'
-          >
-            <Text className='text-gray-700 flex-1'>
-              {formData.colors.length > 0
-                ? `${formData.colors.length} color(s) selected`
-                : 'Select product colors'
-              }
+            <TouchableOpacity
+              onPress={() => navigation.navigate("colorSelection")}
+              className="border border-gray-400 p-4 rounded-xl flex-row justify-between bg-white"
+            >
+              <Text className="text-gray-700">
+                {formData.colors.length > 0
+                  ? `${formData.colors.length} selected`
+                  : "Select colors"}
+              </Text>
+              <Ionicons name="chevron-forward-outline" size={22} color="gray" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Category */}
+          <View className="mb-4">
+            <Text className="text-lg font-semibold mb-2 text-gray-800">
+              Select Category
             </Text>
-            <Ionicons name='chevron-forward-outline' size={24} color='gray' />
+            <TouchableOpacity
+              onPress={() => navigation.navigate("category")}
+              className="border border-gray-400 p-4 rounded-xl flex-row justify-between bg-white"
+            >
+              <Text className="text-gray-700">
+                {formData.category || "Select product category"}
+              </Text>
+              <Ionicons name="chevron-forward-outline" size={22} color="gray" />
+            </TouchableOpacity>
+          </View>
+
+          {/* BUTTON FIXED */}
+          <TouchableOpacity className="bg-blue-500 py-4 rounded-lg mb-8" onPress={handleAdd}>
+            <Text className="text-center text-white font-semibold text-lg">
+              ADD PRODUCT
+            </Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
 
-        {/* category */}
-        <View>
-          <Text className='text-lg font-semibold mb-2 text-gray-800'>Select Category</Text>
-          <TouchableOpacity
-            onPress={handleCategoryInput}
-            className='border border-gray-400 p-4 rounded-xl flex-row items-center justify-between w-full'>
-            <Text className='text-gray-700 flex-1'>{formData.category || 'Select product category'}</Text>
-            <Ionicons name='chevron-forward-outline' size={24} color='gray' />
-          </TouchableOpacity>
-        </View>
+export default AddProductScreen;
 
-        <TouchableOpacity onPress={handleAdd} className='py-4 px-4 bg-blue-400 mb-5 mt-4 rounded-lg'>
-          <Text className='text-white text-center font-semibold text-lg'>ADD PRODUCT</Text>
-        </TouchableOpacity>
 
-      </ScrollView>
-    </View>
-  )
-}
-
-export default AddProductScreen

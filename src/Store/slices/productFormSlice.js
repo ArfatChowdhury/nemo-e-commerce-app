@@ -36,6 +36,7 @@ const productFormSlice = createSlice({
             state.stock = '';
             state.colors = [];
             state.category = '';
+            state.images = []
         },
         addProduct: (state, action) => {
             state.products.push(action.payload)
