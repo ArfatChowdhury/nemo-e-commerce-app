@@ -9,6 +9,7 @@ import CartScreen from "../screens/CartScreen";
 import Category from "../screens/Category";
 import { Platform } from "react-native";
 import ColorSelection from "../screens/ColorSelection";
+import ProductDetails from "../screens/ProductDetails";
 
 
 const Tab = createBottomTabNavigator()
@@ -71,6 +72,8 @@ export default function AppNavigator() {
                         },
                         cardOverlayEnabled: true,
                     }} />
+                <Stack.Screen name="productDetails" component={ProductDetails}/>
+
             </Stack.Navigator>
         </NavigationContainer>
     )

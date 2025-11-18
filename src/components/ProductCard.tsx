@@ -1,10 +1,12 @@
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 // import PropTypes from 'prop-types';
 
 const ProductCard = ({ item, onPress }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const navigation = useNavigation()
 
   console.log('🖼️ Product Image URL:',item.images?.[0]);
 
@@ -37,10 +39,15 @@ const ProductCard = ({ item, onPress }) => {
     return `Product: ${item.productName}, Price: ${formatPrice(item.price)}, Brand: ${item.brandName}, ${item.stock > 10 ? 'In Stock' : `Only ${item.stock} left`}`;
   };
 
+  const handleProductPress = useCallback(() => {
+    navigation.navigate("productDetails", {
+      productId: item._id 
+    });
+  }, [navigation, item._id]);
   return (
     <TouchableOpacity 
       className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-48"
-      onPress={() => onPress(item)}
+      onPress={() => handleProductPress(item._id)}
       accessible={true}
       accessibilityLabel={getAccessibilityLabel()}
       accessibilityRole="button"
