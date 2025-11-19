@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { act } from "react";
 
 
 
@@ -14,6 +15,7 @@ const productFormSlice = createSlice({
         category: '',
         images: [],
         products: [],
+        cartItems: [],
         loading: false,
         error: null
     },
@@ -64,6 +66,9 @@ const productFormSlice = createSlice({
         },
         setProducts: (state, action) =>{
             state.products = action.payload
+        },
+        addToCart: (state,action)=>{
+            state.cartItems.push(action.payload)
         }
     }
 })
@@ -88,5 +93,5 @@ export const fetchProducts = () => {
 
 
 
-export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage, setProducts, setLoading, setError } = productFormSlice.actions;
+export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage, setProducts, setLoading, setError, addToCart } = productFormSlice.actions;
 export default productFormSlice.reducer

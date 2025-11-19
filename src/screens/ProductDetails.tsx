@@ -1,24 +1,48 @@
-import { View, Text, ScrollView, Image, ActivityIndicator } from 'react-native'
-import React from 'react'
-import { useRoute } from '@react-navigation/native'
-import { useSelector } from 'react-redux'
+import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native'
+import React, { useState } from 'react'
+import { useRoute, useNavigation } from '@react-navigation/native'
+import { useDispatch, useSelector } from 'react-redux'
+import HeaderBar from '../components/HeaderBar'
+import { addToCart } from '../Store/slices/productFormSlice'
+import { Ionicons } from '@expo/vector-icons'
+import ProductCard from '../components/ProductCard'
 
 const ProductDetails = () => {
     const route = useRoute()
+    const navigation = useNavigation()
     const { productId } = route.params
     const loading = useSelector(state => state.productForm.loading)
     const error = useSelector(state => state.productForm.error)
     const products = useSelector(state => state.productForm.products)
+    const cartItem = useSelector(state => state.productForm.cartItems)
+    const dispatch = useDispatch()
 
     const product = products.find(p => p._id === productId)
+    const [showFullDescription, setShowFullDescription] = useState(false)
 
-    console.log(product, 'find from find method');
-    
+    // Get similar products (all products for now, excluding current product)
+    const similarProducts = products.filter(p => p._id !== productId).slice(0, 4)
 
-    console.log('Product ID:', productId)
+    const handleAddToCart = (product) => {
+        dispatch(addToCart(product))
+    }
+
+    const handleProductPress = (product) => {
+        navigation.navigate("productDetails", {
+            productId: product._id
+        })
+    }
+
+    // Truncate description
+    const truncateDescription = (text, length = 120) => {
+        if (!text) return '';
+        if (text.length <= length) return text;
+        return text.substring(0, length) + '...';
+    }
+
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center">
+            <View className="flex-1 justify-center items-center bg-white">
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text className="text-gray-500 mt-4">Loading product...</Text>
             </View>
@@ -27,8 +51,9 @@ const ProductDetails = () => {
 
     if (error) {
         return (
-            <View className="flex-1 justify-center items-center px-4">
-                <Text className="text-red-500 text-lg font-semibold">Error loading product</Text>
+            <View className="flex-1 justify-center items-center px-4 bg-white">
+                <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+                <Text className="text-red-500 text-lg font-semibold mt-4 text-center">Error loading product</Text>
                 <Text className="text-gray-600 mt-2 text-center">{error}</Text>
             </View>
         )
@@ -36,71 +61,138 @@ const ProductDetails = () => {
 
     if (!product) {
         return (
-            <View className="flex-1 justify-center items-center">
-                <Text className="text-gray-500 text-lg">Product not found</Text>
+            <View className="flex-1 justify-center items-center bg-white">
+                <Ionicons name="search-outline" size={48} color="#6B7280" />
+                <Text className="text-gray-500 text-lg mt-4">Product not found</Text>
             </View>
         )
     }
 
     return (
-        <ScrollView className="flex-1 bg-white">
-            {/* Product Image */}
-            {product.images && product.images.length > 0 && (
-                <Image 
-                    source={{ uri: product.images[0] }}
-                    className="w-full h-80"
-                    resizeMode="cover"
-                />
-            )}
+        <View className="flex-1 bg-gray-50">
+            <HeaderBar title="Product Details" iconName='arrow-back' />
             
-            {/* Product Details */}
-            <View className="p-4">
-                <Text className="text-2xl font-bold text-gray-800 mb-2">
-                    {product.productName}
-                </Text>
-                
-                <Text className="text-lg text-gray-600 mb-1">
-                    Brand: {product.brandName}
-                </Text>
-                
-                <Text className="text-2xl font-bold text-blue-500 mb-4">
-                    ${product.price}
-                </Text>
-                
-                <Text className="text-base text-gray-700 mb-4">
-                    {product.description}
-                </Text>
-                
-                <Text className={`text-lg font-medium ${
-                    product.stock > 10 ? 'text-green-500' : 'text-red-500'
-                }`}>
-                    {product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
-                </Text>
+            <ScrollView 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 30 }}
+            >
+                {/* Product Image with Shadow */}
+                <View className="bg-white rounded-b-3xl shadow-lg shadow-black/10 pb-6">
+                    {product.images && product.images.length > 0 && (
+                        <Image
+                            source={{ uri: product.images[0] }}
+                            className="w-full h-96 rounded-b-3xl"
+                            resizeMode="cover"
+                        />
+                    )}
+                </View>
 
-                {/* Colors */}
-                {product.colors && product.colors.length > 0 && (
-                    <View className="mt-4">
-                        <Text className="text-lg font-semibold mb-2">Available Colors:</Text>
-                        <View className="flex-row flex-wrap">
-                            {product.colors.map((color, index) => (
-                                <View key={index} className="flex-row items-center mr-4 mb-2">
-                                    <View 
-                                        className="w-6 h-6 rounded-full mr-2 border border-gray-300"
-                                        style={{ backgroundColor: color.value }}
-                                    />
-                                    <Text>{color.name}</Text>
-                                </View>
-                            ))}
+                {/* Product Details Card */}
+                <View className="bg-white mx-4 mt-6 rounded-3xl shadow-sm shadow-black/5 p-6">
+                    {/* Product Name and Price */}
+                    <View className="flex-row justify-between items-start mb-4">
+                        <Text className="text-2xl font-bold text-gray-900 flex-1 mr-4">
+                            {product.productName}
+                        </Text>
+                        <Text className="text-2xl font-bold text-blue-600">
+                            ${product.price}
+                        </Text>
+                    </View>
+
+                    {/* Brand and Stock */}
+                    <View className="flex-row justify-between items-center mb-6">
+                        <Text className="text-base text-gray-600">
+                            by {product.brandName}
+                        </Text>
+                        <View className={`px-3 py-1 rounded-full ${
+                            product.stock > 10 ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                            <Text className={`text-sm font-medium ${
+                                product.stock > 10 ? 'text-green-800' : 'text-red-800'
+                            }`}>
+                                {product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
+                            </Text>
                         </View>
                     </View>
-                )}
 
-                {/* Category */}
-                <Text className="text-gray-600 mt-4">
-                    Category: {product.category}
-                </Text>
-            </View>
-        </ScrollView>
+                    {/* Description */}
+                    <View className="mb-6">
+                        <Text className="text-lg font-semibold text-gray-900 mb-3">Description</Text>
+                        <Text className="text-gray-600 leading-6">
+                            {showFullDescription ? product.description : truncateDescription(product.description)}
+                        </Text>
+                        {product.description && product.description.length > 120 && (
+                            <TouchableOpacity 
+                                onPress={() => setShowFullDescription(!showFullDescription)}
+                                className="mt-2"
+                            >
+                                <Text className="text-blue-500 font-medium">
+                                    {showFullDescription ? 'See Less' : 'See More'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    {/* Colors */}
+                    {product.colors && product.colors.length > 0 && (
+                        <View className="mb-6">
+                            <Text className="text-lg font-semibold text-gray-900 mb-3">Available Colors</Text>
+                            <View className="flex-row flex-wrap">
+                                {product.colors.map((color, index) => (
+                                    <View key={index} className="flex-row items-center mr-4 mb-3">
+                                        <View 
+                                            className="w-8 h-8 rounded-full mr-3 border-2 border-gray-200 shadow-sm"
+                                            style={{ backgroundColor: color.value }}
+                                        />
+                                        <Text className="text-gray-700 font-medium">{color.name}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Category */}
+                    <View className="mb-6">
+                        <Text className="text-lg font-semibold text-gray-900 mb-2">Category</Text>
+                        <View className="bg-gray-100 px-4 py-2 rounded-2xl self-start">
+                            <Text className="text-gray-700 font-medium">{product.category}</Text>
+                        </View>
+                    </View>
+
+                    {/* Add to Cart Button */}
+                    <TouchableOpacity 
+                        onPress={() => handleAddToCart(product)}
+                        className="bg-blue-500 py-4 rounded-2xl shadow-lg shadow-blue-500/30"
+                    >
+                        <Text className="text-white text-center font-bold text-lg">
+                            Add to Cart
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Similar Products Section */}
+                {similarProducts.length > 0 && (
+                    <View className="mt-8 mx-4">
+                        <Text className="text-2xl font-bold text-gray-900 mb-4">Similar Products</Text>
+                        <FlatList
+                            data={similarProducts}
+                            keyExtractor={(item) => item._id || item.id}
+                            renderItem={({ item }) => (
+                                <View className="mr-4" style={{ width: 160 }}>
+                                    <ProductCard 
+                                        item={item}
+                                        onPress={handleProductPress}
+                                    />
+                                </View>
+                            )}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ paddingRight: 16 }}
+                        />
+                    </View>
+                )}
+            </ScrollView>
+        </View>
     )
 }
 
