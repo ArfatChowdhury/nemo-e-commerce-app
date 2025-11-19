@@ -19,7 +19,7 @@ interface ProfileScreenProps {
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   return (
     <View>
-      <ProfileButton name='Add Product' iconName='add' onPress={() => navigation.navigate('addProduct')} />
+      <ProfileButton iconName='bag-handle-outline' name='Product Management' onPress={() => navigation.navigate('productManagement')}/>
       <ProfileButton name='Messages' iconName='mail-outline' onPress={() => navigation.navigate('messages')} />
       <ProfileButton iconName='settings-outline' name='Settings' onPress={() => navigation.navigate('settings')} />
     </View>
