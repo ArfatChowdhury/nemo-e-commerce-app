@@ -7,6 +7,7 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import React, { useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
@@ -29,14 +30,14 @@ const EditFormScreen = () => {
   const route = useRoute();
   const dispatch = useDispatch();
   const formData = useSelector((state) => state.productForm);
-  const products = useSelector( state => state.productForm.products)
-  
+  const products = useSelector(state => state.productForm.products)
+
   // Get the product data from navigation params
   const { productId } = route.params || {};
 
   const product = products.find(p => p._id === productId);
 
-  
+
   useEffect(() => {
     if (product) {
       dispatch(updateField({ field: "productName", value: product.productName || "" }));
@@ -116,7 +117,7 @@ const EditFormScreen = () => {
 
     try {
       console.log('📤 Starting product update...');
-      
+
       // Upload new images first
       console.log('🖼️ Uploading new images to ImgBB...');
       const uploadedUrls = await uploadAllImages(formData.images);
@@ -134,7 +135,7 @@ const EditFormScreen = () => {
       // Make the API request to update product
       const response = await fetch(`${BASE_URL}/products/${product._id}`, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
@@ -151,7 +152,7 @@ const EditFormScreen = () => {
 
       // Parse JSON only if it's actually JSON
       const json = await response.json();
-      
+
       if (!response.ok) {
         console.log('❌ Server error response:', json);
         throw new Error(json.message || `HTTP error! status: ${response.status}`);
@@ -161,13 +162,14 @@ const EditFormScreen = () => {
 
       // Success
       dispatch(fetchProducts());
+      dispatch(resetForm())
       Alert.alert("Success", "Product updated successfully!");
       navigation.goBack();
-      
+
     } catch (err) {
       console.log('❌ Error updating product:', err);
       Alert.alert(
-        "Error", 
+        "Error",
         err.message || "Failed to update product. Please check your connection and try again."
       );
     }
@@ -231,16 +233,52 @@ const EditFormScreen = () => {
 
           {/* Images */}
           <View style={{ marginBottom: 24 }}>
-            <Text className="text-lg font-semibold mb-2 text-gray-800">
-              Product Images
-            </Text>
-            <NewImagePicker />
-            {formData.images.length > 0 && (
-              <Text className="text-green-600 text-sm mt-1">
-                {formData.images.length} image(s) selected
-              </Text>
-            )}
+  <Text className="text-lg font-semibold mb-2 text-gray-800">
+    Product Images
+  </Text>
+  <NewImagePicker />
+  
+  {/* Show selected images in small size */}
+  {formData.images.length > 0 && (
+    <View className="mt-3">
+      <Text className="text-green-600 text-sm mb-2">
+        {formData.images.length} image(s) selected
+      </Text>
+      
+      {/* Small image previews */}
+      <View className="flex-row flex-wrap">
+        {formData.images.map((image, index) => (
+          <View key={index} className="mr-3 mb-3 relative">
+            <View className="w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">
+              <Image
+                source={{ uri: image }}
+                className="w-full h-full"
+                resizeMode="cover"
+                onError={() => console.log('Image failed to load:', image)}
+              />
+            </View>
+            
+            {/* Remove button */}
+            <TouchableOpacity 
+              onPress={() => {
+                const updatedImages = formData.images.filter((_, i) => i !== index);
+                dispatch(updateField({ field: "images", value: updatedImages }));
+              }}
+              className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-white shadow-sm"
+            >
+              <Ionicons name="close" size={12} color="white" />
+            </TouchableOpacity>
+            
+            {/* Image number badge */}
+            <View className="absolute top-1 left-1 bg-black/50 px-1 rounded">
+              <Text className="text-white text-xs">{index + 1}</Text>
+            </View>
           </View>
+        ))}
+      </View>
+    </View>
+  )}
+</View>
 
           {/* Brand */}
           <View style={{ marginBottom: 20 }}>

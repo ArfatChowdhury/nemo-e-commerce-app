@@ -8,7 +8,7 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -29,6 +29,11 @@ const AddProductScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const formData = useSelector((state) => state.productForm);
+
+
+  useEffect(() => {
+    dispatch(resetForm());
+  }, [dispatch]);
 
   // ImgBB Upload
   const uploadImageToImgBB = async (uri) => {
@@ -83,36 +88,7 @@ const AddProductScreen = () => {
     return null;
   };
 
-  // Add product
-  // const handleAdd = async () => {
-  //   const error = validateForm();
-  //   if (error) return Alert.alert("Error", error);
-
-  //   try {
-  //     const uploadedUrls = await uploadAllImages(formData.images);
-
-  //     const productData = {
-  //       ...formData,
-  //       images: uploadedUrls,
-  //       createdAt: new Date().toISOString(),
-  //     };
-
-  //     const res = await fetch(`${BASE_URL}/products`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(productData),
-  //     });
-
-  //     const json = await res.json();
-  //     if (!res.ok) throw new Error(JSON.stringify(json));
-
-  //     dispatch(fetchProducts());
-  //     dispatch(resetForm());
-  //     Alert.alert("Success", "Product added successfully!");
-  //   } catch (err) {
-  //     Alert.alert("Error", err.message);
-  //   }
-  // };
+ 
 
   const handleAdd = async () => {
     const error = validateForm();

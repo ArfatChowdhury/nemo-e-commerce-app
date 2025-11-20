@@ -13,6 +13,7 @@ import ProductDetails from "../screens/ProductDetails";
 import ProductManagement from "../screens/ProductManagement";
 import EditProductScreen from "../screens/EditProductScreen";
 import EditFormScreen from "../screens/EditFormScreen";
+import { useSelector } from "react-redux";
 
 
 const Tab = createBottomTabNavigator()
@@ -20,6 +21,8 @@ const Stack = createStackNavigator()
 
 
 function MyTabs() {
+    const cartItems = useSelector(state => state.productForm.cartItems)
+    const cartItemCount = cartItems.length
     return (
         <Tab.Navigator screenOptions={{ headerShown: false }}>
             <Tab.Screen name="Home" component={HomeScreen} options={{
@@ -30,8 +33,12 @@ function MyTabs() {
             <Tab.Screen name='Cart' component={CartScreen} options={{
                 tabBarIcon: ({ color, size, focused }) => (
                     <Ionicons name="cart" size={size} color={color} />
-
-                )
+                ),
+                tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
+                tabBarBadgeStyle: {
+                    backgroundColor: 'red',
+                    fontSize: 12,
+                  }
             }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarIcon: ({ color, size, focused }) => (

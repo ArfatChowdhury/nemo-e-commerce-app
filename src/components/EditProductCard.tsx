@@ -3,13 +3,18 @@ import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 // import PropTypes from 'prop-types';
+import { API_BASE_URL } from '../constants/apiConfig'
+import { useDispatch } from 'react-redux';
+import { fetchProducts } from '../Store/slices/productFormSlice';
+
 
 const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const navigation = useNavigation()
-
-  console.log('🖼️ Product Image URL:',item.images?.[0]);
+  const dispatch = useDispatch()
+  const Base_URL = API_BASE_URL
+  console.log('🖼️ Product Image URL:', item.images?.[0]);
 
   const handleImageError = (e) => {
     console.log('❌ Image failed to load:', e.nativeEvent.error);
@@ -42,16 +47,16 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
 
 
 
-const handleEditPress = () => {
-  if (onEdit) {
-    onEdit(item);
-  } else {
-  
-    navigation.navigate("EditForm", {
-      productId: item._id 
-    });
-  }
-};
+  const handleEditPress = () => {
+    if (onEdit) {
+      onEdit(item);
+    } else {
+
+      navigation.navigate("EditForm", {
+        productId: item._id
+      });
+    }
+  };
 
   const handleDeletePress = () => {
     Alert.alert(
@@ -62,15 +67,52 @@ const handleEditPress = () => {
           text: "Cancel",
           style: "cancel"
         },
-        { 
-          text: "Delete", 
+        {
+          text: "Delete",
           style: "destructive",
-          onPress: () => {
-            if (onDelete) {
-              onDelete(item._id);
-            } else {
-              console.log('Delete product:', item._id);
-              // Add your delete logic here
+          onPress: async () => {
+            try {
+              console.log('🗑️ Attempting to delete product:', item._id);
+              console.log('🌐 URL:', `${Base_URL}/products/${item._id}`);
+
+              const response = await fetch(`${Base_URL}/products/${item._id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              console.log('📡 Response status:', response.status);
+
+              if (response.ok) {
+                console.log('✅ Product deleted successfully');
+
+                if (onDelete) {
+                  onDelete(item._id);
+                }
+
+                // Show success message
+                Alert.alert('Success', 'Product deleted successfully');
+                dispatch(fetchProducts())
+
+              } else {
+                // Get the actual error message from backend
+                const errorText = await response.text();
+                console.error('❌ Failed to delete product:', response.status, errorText);
+
+                let errorMessage = 'Failed to delete product';
+                try {
+                  const errorData = JSON.parse(errorText);
+                  errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                  errorMessage = errorText || `Server error: ${response.status}`;
+                }
+
+                Alert.alert('Error', errorMessage);
+              }
+            } catch (error) {
+              console.error('❌ Network error deleting product:', error);
+              Alert.alert('Error', `Network error: ${error.message}`);
             }
           }
         }
@@ -83,15 +125,15 @@ const handleEditPress = () => {
       {/* Action Buttons - Top Right */}
       <View className="absolute top-2 right-2 z-10 flex-row">
         {/* Edit Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleEditPress}
           className="bg-blue-500 w-8 h-8 rounded-full items-center justify-center mr-1 shadow-sm"
         >
           <Ionicons name="create-outline" size={16} color="white" />
         </TouchableOpacity>
-        
+
         {/* Delete Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleDeletePress}
           className="bg-red-500 w-8 h-8 rounded-full items-center justify-center shadow-sm"
         >
@@ -110,10 +152,10 @@ const handleEditPress = () => {
             </View>
           ) : (
             <View className="relative w-full h-full">
-              <Image 
-                source={{ 
-                  uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png' 
-                }} 
+              <Image
+                source={{
+                  uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png'
+                }}
                 className="w-full h-full rounded-t-xl"
                 resizeMode="cover"
                 onError={handleImageError}
@@ -133,7 +175,7 @@ const handleEditPress = () => {
       {/* Product Details */}
       <View className="p-3">
         {/* Brand Name */}
-        <Text 
+        <Text
           className="text-xs text-gray-600 mb-1"
           accessibilityRole="text"
           accessibilityLabel={`Brand: ${item.brandName}`}
@@ -142,8 +184,8 @@ const handleEditPress = () => {
         </Text>
 
         {/* Product Name */}
-        <Text 
-          className="text-sm font-bold mb-1.5 text-gray-800" 
+        <Text
+          className="text-sm font-bold mb-1.5 text-gray-800"
           numberOfLines={2}
           accessibilityRole="text"
         >
@@ -151,17 +193,17 @@ const handleEditPress = () => {
         </Text>
 
         {/* Price */}
-        <Text 
+        <Text
           className="text-base font-bold text-blue-500 mb-2"
           accessibilityRole="text"
           accessibilityLabel={`Price: ${formatPrice(item.price)}`}
         >
           {formatPrice(item.price)}
         </Text>
-        
+
         {/* Stock Status */}
         <View className="mb-2">
-          <Text 
+          <Text
             className={`
               text-xs font-medium
               ${item.stock > 10 ? 'text-green-500' : 'text-red-500'}
@@ -172,16 +214,16 @@ const handleEditPress = () => {
             {item.stock > 10 ? 'In Stock' : `Only ${item.stock} left`}
           </Text>
         </View>
-        
+
         {/* Color Options */}
         {item.colors && item.colors.length > 0 && (
-          <View 
+          <View
             className="flex-row items-center"
             accessibilityRole="text"
             accessibilityLabel={`Available in ${item.colors.length} colors`}
           >
             {item.colors.slice(0, 3).map((color, index) => (
-              <View 
+              <View
                 key={`${color.value}-${index}`}
                 className="w-3 h-3 rounded-full mr-1 border border-gray-200"
                 style={{ backgroundColor: color.value }}
@@ -190,7 +232,7 @@ const handleEditPress = () => {
               />
             ))}
             {item.colors.length > 3 && (
-              <Text 
+              <Text
                 className="text-xs text-gray-600 ml-1"
                 accessibilityRole="text"
               >
