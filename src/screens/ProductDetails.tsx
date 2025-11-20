@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, FlatList, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -19,12 +19,40 @@ const ProductDetails = () => {
 
     const product = products.find(p => p._id === productId)
     const [showFullDescription, setShowFullDescription] = useState(false)
+    const [selectedColor, setSelectedColor] = useState(null)
 
-    // Get similar products (all products for now, excluding current product)
     const similarProducts = products.filter(p => p._id !== productId).slice(0, 4)
 
     const handleAddToCart = (product) => {
-        dispatch(addToCart(product))
+        // Check if product has colors and no color is selected
+        if (product.colors && product.colors.length > 0 && !selectedColor) {
+            Alert.alert(
+                "Select Color",
+                "Please select a color before adding to cart",
+                [{ text: "OK" }]
+            )
+            return
+        }
+
+        // Create cart item with selected color
+        const cartItem = {
+            ...product,
+            selectedColor: selectedColor || null,
+            cartItemId: `${product._id}-${selectedColor ? selectedColor.name : 'no-color'}-${Date.now()}` // Unique ID for cart item
+        }
+
+        dispatch(addToCart(cartItem))
+        
+        // Show success feedback
+        Alert.alert(
+            "Added to Cart",
+            `${product.productName}${selectedColor ? ` (${selectedColor.name})` : ''} has been added to your cart`,
+            [{ text: "OK" }]
+        )
+    }
+
+    const handleColorSelect = (color) => {
+        setSelectedColor(color)
     }
 
     const handleProductPress = (product) => {
@@ -133,7 +161,52 @@ const ProductDetails = () => {
                         )}
                     </View>
 
-                    {/* Colors */}
+                    {/* Color Selection */}
+                    {product.colors && product.colors.length > 0 && (
+                        <View className="mb-6">
+                            <Text className="text-lg font-semibold text-gray-900 mb-3">
+                                Select Color
+                                {selectedColor && (
+                                    <Text className="text-blue-500 font-normal"> • {selectedColor.name}</Text>
+                                )}
+                            </Text>
+                            
+                            {/* Color Selection Required Message */}
+                            {!selectedColor && (
+                                <Text className="text-red-500 text-sm mb-3">
+                                    * Please select a color
+                                </Text>
+                            )}
+                            
+                            <View className="flex-row flex-wrap">
+                                {product.colors.map((color, index) => (
+                                    <TouchableOpacity
+                                        key={index}
+                                        onPress={() => handleColorSelect(color)}
+                                        className={`flex-row items-center mr-4 mb-3 p-2 rounded-2xl border-2 ${
+                                            selectedColor?.name === color.name 
+                                                ? 'border-blue-500 bg-blue-50' 
+                                                : 'border-gray-200 bg-white'
+                                        } shadow-sm`}
+                                    >
+                                        <View 
+                                            className="w-8 h-8 rounded-full mr-3 border-2 border-gray-300 shadow-sm"
+                                            style={{ backgroundColor: color.value }}
+                                        />
+                                        <Text className={`font-medium ${
+                                            selectedColor?.name === color.name 
+                                                ? 'text-blue-700' 
+                                                : 'text-gray-700'
+                                        }`}>
+                                            {color.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Available Colors (Display only - non interactive) */}
                     {product.colors && product.colors.length > 0 && (
                         <View className="mb-6">
                             <Text className="text-lg font-semibold text-gray-900 mb-3">Available Colors</Text>
@@ -141,10 +214,10 @@ const ProductDetails = () => {
                                 {product.colors.map((color, index) => (
                                     <View key={index} className="flex-row items-center mr-4 mb-3">
                                         <View 
-                                            className="w-8 h-8 rounded-full mr-3 border-2 border-gray-200 shadow-sm"
+                                            className="w-6 h-6 rounded-full mr-2 border border-gray-300"
                                             style={{ backgroundColor: color.value }}
                                         />
-                                        <Text className="text-gray-700 font-medium">{color.name}</Text>
+                                        <Text className="text-gray-600 text-sm">{color.name}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -162,12 +235,29 @@ const ProductDetails = () => {
                     {/* Add to Cart Button */}
                     <TouchableOpacity 
                         onPress={() => handleAddToCart(product)}
-                        className="bg-blue-500 py-4 rounded-2xl shadow-lg shadow-blue-500/30"
+                        className={`py-4 rounded-2xl shadow-lg ${
+                            (product.colors && product.colors.length > 0 && !selectedColor)
+                                ? 'bg-gray-400 shadow-gray-400/30'
+                                : 'bg-blue-500 shadow-blue-500/30'
+                        }`}
+                        disabled={product.colors && product.colors.length > 0 && !selectedColor}
                     >
                         <Text className="text-white text-center font-bold text-lg">
-                            Add to Cart
+                            {product.colors && product.colors.length > 0 && !selectedColor
+                                ? 'Select Color First'
+                                : 'Add to Cart'
+                            }
                         </Text>
                     </TouchableOpacity>
+
+                    {/* Selected Color Preview */}
+                    {selectedColor && (
+                        <View className="mt-4 p-3 bg-blue-50 rounded-2xl border border-blue-200">
+                            <Text className="text-blue-800 text-center font-medium">
+                                Selected: <Text className="font-bold">{selectedColor.name}</Text>
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Similar Products Section */}

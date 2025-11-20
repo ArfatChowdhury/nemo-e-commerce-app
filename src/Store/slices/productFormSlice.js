@@ -1,7 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { act } from "react";
-
-
 
 const productFormSlice = createSlice({
     name: 'productForm',
@@ -67,11 +64,55 @@ const productFormSlice = createSlice({
         setProducts: (state, action) =>{
             state.products = action.payload
         },
-        addToCart: (state,action)=>{
-            state.cartItems.push(action.payload)
+        addToCart: (state, action) => {
+            const newItem = action.payload;
+            
+            const cartItemId = `${newItem._id}-${newItem.selectedColor ? newItem.selectedColor.name : 'no-color'}`;
+            
+            const existingItemIndex = state.cartItems.findIndex(item => 
+                item.cartItemId === cartItemId
+            );
+            
+            if (existingItemIndex >= 0) {
+             
+                state.cartItems[existingItemIndex].quantity += 1;
+            } else {
+                
+                state.cartItems.push({
+                    ...newItem,
+                    cartItemId: cartItemId,
+                    quantity: 1
+                });
+            }
+        },
+        removeFromCart: (state, action) => {
+            const cartItemId = action.payload;
+            state.cartItems = state.cartItems.filter(item => item.cartItemId !== cartItemId);
+        },
+        increaseQuantity: (state, action) => {
+            const cartItemId = action.payload;
+            const item = state.cartItems.find(item => item.cartItemId === cartItemId);
+            if (item) {
+                item.quantity += 1;
+            }
+        },
+        decreaseQuantity: (state, action) => {
+            const cartItemId = action.payload;
+            const item = state.cartItems.find(item => item.cartItemId === cartItemId);
+            if (item) {
+                if (item.quantity > 1) {
+                    item.quantity -= 1;
+                } else {
+                    // Remove item if quantity becomes 0
+                    state.cartItems = state.cartItems.filter(item => item.cartItemId !== cartItemId);
+                }
+            }
+        },
+        clearCart: (state) => {
+            state.cartItems = [];
         }
     }
-})
+});
 
 export const fetchProducts = () => {
     return async(dispatch) =>{
@@ -82,16 +123,33 @@ export const fetchProducts = () => {
             const response = await fetch('https://backend-of-nemo.vercel.app/products')
             const data = await response.json()
             dispatch(setProducts(data.data || data))
-        }catch{
+        } catch(error) {
             console.error('Error fetching products:', error)
             dispatch(setError(error.message))
-        }finally{
+        } finally {
             dispatch(setLoading(false))
         }
     }
 }
 
+export const { 
+    updateField, 
+    setColors, 
+    setCategory, 
+    resetForm, 
+    addProduct, 
+    addImage, 
+    setImages,
+    removeImage,
+    setMainImage, 
+    setProducts, 
+    setLoading, 
+    setError, 
+    addToCart,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart
+} = productFormSlice.actions;
 
-
-export const { updateField, setColors, setCategory, resetForm, addProduct, addImage, setImages,removeImage,setMainImage, setProducts, setLoading, setError, addToCart } = productFormSlice.actions;
-export default productFormSlice.reducer
+export default productFormSlice.reducer;
