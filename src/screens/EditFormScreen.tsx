@@ -110,70 +110,76 @@ const EditFormScreen = () => {
     return null;
   };
 
-  // Update product function
-  const handleUpdate = async () => {
-    const error = validateForm();
-    if (error) return Alert.alert("Error", error);
+ 
+ 
+const handleUpdate = async () => {
+  const error = validateForm();
+  if (error) return Alert.alert("Error", error);
 
-    try {
-      console.log('📤 Starting product update...');
+  try {
+    console.log('📤 Starting product update...');
 
-      // Upload new images first
-      console.log('🖼️ Uploading new images to ImgBB...');
-      const uploadedUrls = await uploadAllImages(formData.images);
-      console.log('✅ Images processed:', uploadedUrls);
+    // Upload new images first
+    console.log('🖼️ Uploading new images to ImgBB...');
+    const uploadedUrls = await uploadAllImages(formData.images);
+    console.log('✅ Images processed:', uploadedUrls);
 
-      // Prepare product data
-      const productData = {
-        ...formData,
-        images: uploadedUrls,
-        updatedAt: new Date().toISOString(),
-      };
+   
+    const productData = {
+      productName: formData.productName,
+      price: parseFloat(formData.price), 
+      description: formData.description,
+      brandName: formData.brandName,
+      stock: parseInt(formData.stock), 
+      category: formData.category,
+      colors: formData.colors,
+      images: uploadedUrls,
+      updatedAt: new Date().toISOString(),
+    };
 
-      console.log('📦 Sending update to server:', productData);
+    console.log('📦 Sending update to server (clean data):', productData);
 
-      // Make the API request to update product
-      const response = await fetch(`${BASE_URL}/products/${product._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(productData),
-      });
+    // Make the API request to update product
+    const response = await fetch(`${BASE_URL}/products/${product._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(productData),
+    });
 
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const textResponse = await response.text();
-        console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
-        throw new Error(`Server error: ${response.status} - ${response.statusText}`);
-      }
-
-      // Parse JSON only if it's actually JSON
-      const json = await response.json();
-
-      if (!response.ok) {
-        console.log('❌ Server error response:', json);
-        throw new Error(json.message || `HTTP error! status: ${response.status}`);
-      }
-
-      console.log('✅ Product updated successfully:', json);
-
-      // Success
-      dispatch(fetchProducts());
-      dispatch(resetForm())
-      Alert.alert("Success", "Product updated successfully!");
-      navigation.goBack();
-
-    } catch (err) {
-      console.log('❌ Error updating product:', err);
-      Alert.alert(
-        "Error",
-        err.message || "Failed to update product. Please check your connection and try again."
-      );
+   
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const textResponse = await response.text();
+      console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
+      throw new Error(`Server error: ${response.status} - ${response.statusText}`);
     }
-  };
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      console.log('❌ Server error response:', json);
+      throw new Error(json.message || `HTTP error! status: ${response.status}`);
+    }
+
+    console.log('✅ Product updated successfully:', json);
+
+  
+    dispatch(fetchProducts());
+    dispatch(resetForm())
+    Alert.alert("Success", "Product updated successfully!");
+    navigation.goBack();
+
+  } catch (err) {
+    console.log('❌ Error updating product:', err);
+    Alert.alert(
+      "Error",
+      err.message || "Failed to update product. Please check your connection and try again."
+    );
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
