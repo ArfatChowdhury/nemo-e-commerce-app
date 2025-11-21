@@ -5,24 +5,26 @@ import { API_BASE_URL } from '../constants/apiConfig'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchProducts } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
+import ProductGridSkeleton from '../components/ProductGridSkeleton'
+// import ProductGridSkeleton from '../components/ProductGridSkeleton'
 
-// Memoize the component
+
 const HomeScreen = React.memo(() => {
   const loading = useSelector(state => state.productForm.loading)
   const products = useSelector(state => state.productForm.products)
   const error = useSelector(state => state.productForm.error)
   const dispatch = useDispatch()
   
-  // Memoize categories computation
+  
   const { categories, uniqueCategories } = useMemo(() => {
     const categoryList = products ? products.map(cat => cat.category) : []
     const uniqueCats = [...new Set(categoryList)]
     return { categories: categoryList, uniqueCategories: uniqueCats }
-  }, [products]) // Only recompute when products change
+  }, [products]) 
 
   const [selectedCategory, setSelectedCategory] = useState('All')
 
-  // Memoize filtered products
+ 
   const filteredProducts = useMemo(() => {
     if (!products) return []
     if (selectedCategory === 'All') return products
@@ -35,7 +37,7 @@ const HomeScreen = React.memo(() => {
 
   console.log('🔄 HomeScreen re-render')
 
-  // Memoize callbacks
+
   const handleCategoryPress = useCallback((category: string) => {
     setSelectedCategory(category)
   }, [])
@@ -45,7 +47,7 @@ const HomeScreen = React.memo(() => {
     // navigation.navigate('ProductDetails', { product })
   }, [])
 
-  // Memoize render items
+  
   const renderCategoryItem = useCallback(({ item }) => (
     <View className='mr-3 p-4 bg-white rounded-lg shadow-sm'>
       <TouchableOpacity onPress={() => handleCategoryPress(item)}>
@@ -66,10 +68,10 @@ const HomeScreen = React.memo(() => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-gray-500 mt-4">Loading products...</Text>
-      </View>
+      // <ProductGridSkeleton items={6} />
+      <ProductGridSkeleton itemsCount={6}/>
+      // <View><Text>hello</Text></View>
+      
     )
   }
 
@@ -109,7 +111,6 @@ const HomeScreen = React.memo(() => {
       {/* Products */}
       <View className="flex-1 px-4">
         <Text className="text-lg font-bold mb-3">Products in {selectedCategory}</Text>
-        
         <FlatList
           data={filteredProducts}
           keyExtractor={keyProductExtractor}
@@ -129,4 +130,9 @@ const HomeScreen = React.memo(() => {
   )
 })
 
+
 export default HomeScreen
+
+
+
+
