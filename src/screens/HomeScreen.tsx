@@ -16,20 +16,30 @@ const HomeScreen = React.memo(() => {
   const dispatch = useDispatch()
 
 
+  const [selectedCategory, setSelectedCategory] = useState('Trending')
+  const [searchQuery, setSearchQuery] = useState('')
+
   const { categories, uniqueCategories } = useMemo(() => {
     const categoryList = products ? products.map(cat => cat.category) : []
     const uniqueCats = [...new Set(categoryList)]
     return { categories: categoryList, uniqueCategories: uniqueCats }
   }, [products])
 
-  const [selectedCategory, setSelectedCategory] = useState('All')
-
-
   const filteredProducts = useMemo(() => {
     if (!products) return []
-    if (selectedCategory === 'All') return products
+    if (selectedCategory === 'Trending') return products
     return products.filter(product => product.category === selectedCategory)
   }, [selectedCategory, products])
+
+  const searchedProducts = useMemo(() => {
+    if (!products) return []
+    if (!searchQuery) return []
+    const query = searchQuery.toLowerCase()
+    return products.filter(product =>
+      product.productName?.toLowerCase().includes(query) ||
+      product.description?.toLowerCase().includes(query)
+    )
+  }, [products, searchQuery])
 
   useEffect(() => {
     dispatch(fetchProducts())
@@ -49,12 +59,19 @@ const HomeScreen = React.memo(() => {
 
 
   const renderCategoryItem = useCallback(({ item }) => (
-    <View className='mr-3 p-4 bg-white rounded-lg shadow-sm'>
-      <TouchableOpacity onPress={() => handleCategoryPress(item)}>
-        <Text className='text-lg font-medium'>{item}</Text>
+    <View className={`mr-3 rounded-lg shadow-sm ${selectedCategory === item ? 'bg-orange-500' : 'bg-white'
+      }`}>
+      <TouchableOpacity
+        onPress={() => handleCategoryPress(item)}
+        className="p-4"
+      >
+        <Text className={`text-base font-medium ${selectedCategory === item ? 'text-white' : 'text-gray-900'
+          }`}>
+          {item}
+        </Text>
       </TouchableOpacity>
     </View>
-  ), [handleCategoryPress])
+  ), [handleCategoryPress, selectedCategory])
 
   const renderProductItem = useCallback(({ item }) => (
     <ProductCard
@@ -69,8 +86,6 @@ const HomeScreen = React.memo(() => {
   if (loading) {
     return (
       <ProductGridSkeleton itemsCount={6} />
-
-
     )
   }
 
@@ -92,13 +107,15 @@ const HomeScreen = React.memo(() => {
         <TextInput
           placeholder='Search desire product'
           className='flex-1 text-base ml-2'
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
 
       {/* Categories */}
       <View className="h-20">
         <FlatList
-          data={['All', ...uniqueCategories]}
+          data={['Trending', ...uniqueCategories]}
           keyExtractor={keyCategoryExtractor}
           renderItem={renderCategoryItem}
           horizontal={true}
@@ -111,7 +128,7 @@ const HomeScreen = React.memo(() => {
       <View className="flex-1 px-4">
         <Text className="text-lg font-bold mb-3">Products in {selectedCategory}</Text>
         <FlatList
-          data={filteredProducts}
+          data={searchQuery ? searchedProducts : filteredProducts}
           keyExtractor={keyProductExtractor}
           renderItem={renderProductItem}
           numColumns={2}
