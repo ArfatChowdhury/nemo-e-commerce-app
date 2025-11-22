@@ -13,6 +13,8 @@ import ProductDetails from "../screens/ProductDetails";
 import ProductManagement from "../screens/ProductManagement";
 import EditProductScreen from "../screens/EditProductScreen";
 import EditFormScreen from "../screens/EditFormScreen";
+import CheckoutScreen from "../screens/CheckoutScreen";
+import PaymentScreen from "../screens/PaymentScreen";
 import { useSelector } from "react-redux";
 
 
@@ -38,7 +40,7 @@ function MyTabs() {
                 tabBarBadgeStyle: {
                     backgroundColor: 'red',
                     fontSize: 12,
-                  }
+                }
             }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarIcon: ({ color, size, focused }) => (
@@ -56,7 +58,7 @@ export default function AppNavigator() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name='bottomTabs' component={MyTabs} />
-                <Stack.Screen name='addProduct' component={AddProductScreen}  />
+                <Stack.Screen name='addProduct' component={AddProductScreen} />
                 <Stack.Screen name="category" component={Category}
                     options={{
                         presentation: 'modal',
@@ -82,10 +84,12 @@ export default function AppNavigator() {
                         },
                         cardOverlayEnabled: true,
                     }} />
-                <Stack.Screen name="productDetails" component={ProductDetails}/>
-                <Stack.Screen name="productManagement" component={ProductManagement}/>
-                <Stack.Screen name="EditProduct" component={EditProductScreen}/>
-                <Stack.Screen name="EditForm" component={EditFormScreen}/>
+                <Stack.Screen name="productDetails" component={ProductDetails} />
+                <Stack.Screen name="productManagement" component={ProductManagement} />
+                <Stack.Screen name="EditProduct" component={EditProductScreen} />
+                <Stack.Screen name="EditForm" component={EditFormScreen} />
+                <Stack.Screen name="Checkout" component={CheckoutScreen} />
+                <Stack.Screen name="Payment" component={PaymentScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>

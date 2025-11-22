@@ -5,9 +5,11 @@ import { Ionicons } from '@expo/vector-icons'
 import HeaderBar from '../components/HeaderBar'
 import { removeFromCart, increaseQuantity, decreaseQuantity, clearCart } from '../Store/slices/productFormSlice'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
 
 const CartScreen = () => {
   const dispatch = useDispatch()
+  const navigation = useNavigation()
   const cartItems = useSelector(state => state.productForm.cartItems)
 
   // Calculate totals
@@ -36,8 +38,8 @@ const CartScreen = () => {
       `Remove ${productName} from cart?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Remove", 
+        {
+          text: "Remove",
           style: "destructive",
           onPress: () => dispatch(removeFromCart(cartItemId))
         }
@@ -45,18 +47,20 @@ const CartScreen = () => {
     )
   }
 
-  const handleClearCart = () => {
-    if (cartItems.length === 0) return
-    
+  const handleHeaderCheckout = () => {
+    if (cartItems.length === 0) {
+      Alert.alert("Cart Empty", "Please add items to cart before checkout")
+      return
+    }
+
     Alert.alert(
-      "Clear Cart",
-      "Remove all items from cart?",
+      "Proceed to Checkout",
+      "Are you ready to checkout?",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Clear All", 
-          style: "destructive",
-          onPress: () => dispatch(clearCart())
+        {
+          text: "Checkout",
+          onPress: () => navigation.navigate('Checkout')
         }
       ]
     )
@@ -67,23 +71,8 @@ const CartScreen = () => {
       Alert.alert("Cart Empty", "Please add items to cart before checkout")
       return
     }
-    
-    Alert.alert(
-      "Checkout",
-      `Proceed to checkout with ${cartItems.length} items?`,
-      [
-        { text: "Continue Shopping", style: "cancel" },
-        { 
-          text: "Checkout", 
-          style: "default",
-          onPress: () => {
-            // Add your checkout logic here
-            Alert.alert("Success", "Order placed successfully!")
-            dispatch(clearCart())
-          }
-        }
-      ]
-    )
+
+    navigation.navigate('Checkout')
   }
 
   if (cartItems.length === 0) {
@@ -106,22 +95,22 @@ const CartScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <HeaderBar title="Shopping Cart" />
-      
-      {/* Cart Header with Clear Button */}
+
+      {/* Cart Header with Checkout Button */}
       <View className="flex-row justify-between items-center px-6 py-4 bg-white border-b border-gray-200">
         <Text className="text-lg font-semibold text-gray-900">
           {cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}
         </Text>
-        <TouchableOpacity 
-          onPress={handleClearCart}
+        <TouchableOpacity
+          onPress={handleHeaderCheckout}
           className="flex-row items-center"
         >
-          <Ionicons name="trash-outline" size={20} color="#EF4444" />
-          <Text className="text-red-500 font-medium ml-1">Clear All</Text>
+          <Ionicons name="card-outline" size={20} color="#3B82F6" />
+          <Text className="text-blue-500 font-medium ml-1">Checkout</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -129,14 +118,14 @@ const CartScreen = () => {
         {/* Cart Items */}
         <View className="px-4 mt-4">
           {cartItems.map((item) => (
-            <View 
+            <View
               key={item.cartItemId}
               className="bg-white rounded-2xl shadow-sm shadow-black/5 p-4 mb-4 border border-gray-100"
             >
               <View className="flex-row">
                 {/* Product Image */}
                 <View className="mr-4">
-                  <Image 
+                  <Image
                     source={{ uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png' }}
                     className="w-20 h-20 rounded-xl"
                     resizeMode="cover"
@@ -148,11 +137,11 @@ const CartScreen = () => {
                   <Text className="text-lg font-semibold text-gray-900 mb-1" numberOfLines={2}>
                     {item.productName}
                   </Text>
-                  
+
                   {/* Selected Color */}
                   {item.selectedColor && (
                     <View className="flex-row items-center mb-2">
-                      <View 
+                      <View
                         className="w-4 h-4 rounded-full mr-2 border border-gray-300"
                         style={{ backgroundColor: item.selectedColor.value }}
                       />
@@ -161,7 +150,7 @@ const CartScreen = () => {
                       </Text>
                     </View>
                   )}
-                  
+
                   <Text className="text-lg font-bold text-blue-600 mb-3">
                     ${item.price}
                   </Text>
@@ -169,18 +158,18 @@ const CartScreen = () => {
                   {/* Quantity Controls */}
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center border border-gray-300 rounded-full">
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         onPress={() => handleDecreaseQuantity(item.cartItemId)}
                         className="w-10 h-10 justify-center items-center"
                       >
                         <Ionicons name="remove" size={20} color="#6B7280" />
                       </TouchableOpacity>
-                      
+
                       <Text className="mx-4 font-semibold text-gray-900">
                         {item.quantity}
                       </Text>
-                      
-                      <TouchableOpacity 
+
+                      <TouchableOpacity
                         onPress={() => handleIncreaseQuantity(item.cartItemId)}
                         className="w-10 h-10 justify-center items-center"
                       >
@@ -189,7 +178,7 @@ const CartScreen = () => {
                     </View>
 
                     {/* Remove Button */}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       onPress={() => handleRemoveItem(item.cartItemId, item.productName)}
                       className="p-2"
                     >
@@ -213,7 +202,7 @@ const CartScreen = () => {
         {/* Order Summary */}
         <View className="bg-white mx-4 mt-4 rounded-2xl shadow-sm shadow-black/5 p-6 border border-gray-100">
           <Text className="text-xl font-bold text-gray-900 mb-4">Order Summary</Text>
-          
+
           <View className="space-y-3">
             <View className="flex-row justify-between">
               <Text className="text-gray-600">Subtotal</Text>
@@ -221,23 +210,23 @@ const CartScreen = () => {
                 ${calculateSubtotal().toFixed(2)}
               </Text>
             </View>
-            
+
             <View className="flex-row justify-between">
               <Text className="text-gray-600">Shipping</Text>
               <Text className="text-gray-900 font-medium">
                 ${calculateSubtotal() > 0 ? '5.99' : '0.00'}
               </Text>
             </View>
-            
+
             <View className="flex-row justify-between">
               <Text className="text-gray-600">Tax (10%)</Text>
               <Text className="text-gray-900 font-medium">
                 ${(calculateSubtotal() * 0.1).toFixed(2)}
               </Text>
             </View>
-            
+
             <View className="h-px bg-gray-200 my-2" />
-            
+
             <View className="flex-row justify-between">
               <Text className="text-lg font-bold text-gray-900">Total</Text>
               <Text className="text-lg font-bold text-blue-600">
@@ -250,7 +239,7 @@ const CartScreen = () => {
 
       {/* Checkout Button */}
       <View className="px-4 pb-6 pt-4 bg-white border-t border-gray-200">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleCheckout}
           className="bg-blue-500 py-4 rounded-2xl shadow-lg shadow-blue-500/30"
         >

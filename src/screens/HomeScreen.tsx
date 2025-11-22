@@ -14,17 +14,17 @@ const HomeScreen = React.memo(() => {
   const products = useSelector(state => state.productForm.products)
   const error = useSelector(state => state.productForm.error)
   const dispatch = useDispatch()
-  
-  
+
+
   const { categories, uniqueCategories } = useMemo(() => {
     const categoryList = products ? products.map(cat => cat.category) : []
     const uniqueCats = [...new Set(categoryList)]
     return { categories: categoryList, uniqueCategories: uniqueCats }
-  }, [products]) 
+  }, [products])
 
   const [selectedCategory, setSelectedCategory] = useState('All')
 
- 
+
   const filteredProducts = useMemo(() => {
     if (!products) return []
     if (selectedCategory === 'All') return products
@@ -47,7 +47,7 @@ const HomeScreen = React.memo(() => {
     // navigation.navigate('ProductDetails', { product })
   }, [])
 
-  
+
   const renderCategoryItem = useCallback(({ item }) => (
     <View className='mr-3 p-4 bg-white rounded-lg shadow-sm'>
       <TouchableOpacity onPress={() => handleCategoryPress(item)}>
@@ -57,7 +57,7 @@ const HomeScreen = React.memo(() => {
   ), [handleCategoryPress])
 
   const renderProductItem = useCallback(({ item }) => (
-    <ProductCard 
+    <ProductCard
       item={item}
       onPress={handleProductPress}
     />
@@ -68,10 +68,9 @@ const HomeScreen = React.memo(() => {
 
   if (loading) {
     return (
-      // <ProductGridSkeleton items={6} />
-      <ProductGridSkeleton itemsCount={6}/>
-      // <View><Text>hello</Text></View>
-      
+      <ProductGridSkeleton itemsCount={6} />
+
+
     )
   }
 

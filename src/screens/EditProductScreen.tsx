@@ -22,14 +22,12 @@ const EditProductScreen = () => {
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
 
-    // Load initial data
     useEffect(() => {
         if (allProducts.length === 0) {
             dispatch(fetchProducts())
         }
     }, [dispatch, allProducts.length])
 
-    // Update displayed products
     useEffect(() => {
         if (allProducts.length > 0) {
             const initialProducts = allProducts.slice(0, ITEMS_PER_PAGE)
@@ -39,7 +37,36 @@ const EditProductScreen = () => {
         }
     }, [allProducts])
 
-    // Load more function
+    // Show full page skeleton during initial loading
+    if (loading && displayedProducts.length === 0) {
+        return (
+            <View className="flex-1 bg-gray-50">
+                <HeaderBar iconName='arrow-back' title='Edit Product' />
+                <ProductGridSkeleton 
+                    itemsCount={8} 
+                    columns={2} 
+                    showSearchAndCategories={false} 
+                />
+            </View>
+        )
+    }
+
+    if (error) {
+        return (
+            <View className="flex-1 bg-gray-50">
+                <HeaderBar iconName='arrow-back' title='Edit Product' />
+                <View className="flex-1 justify-center items-center px-4">
+                    <Text className="text-red-500 text-lg font-semibold text-center">
+                        Error loading products
+                    </Text>
+                    <Text className="text-gray-600 mt-2 text-center">
+                        {error}
+                    </Text>
+                </View>
+            </View>
+        )
+    }
+
     const loadMore = useCallback(() => {
         if (loadingMore || !hasMore) return
 
@@ -69,7 +96,6 @@ const EditProductScreen = () => {
         Alert.alert('Success', 'Product deleted successfully!')
     }, [])
 
-    // VirtualizedList methods
     const getItemCount = useCallback(() => {
         return Math.ceil(displayedProducts.length / NUM_COLUMNS)
     }, [displayedProducts.length])
@@ -86,7 +112,6 @@ const EditProductScreen = () => {
         }
     }, [displayedProducts])
 
-    // Render each row with 2 products
     const renderItem = useCallback(({ item, index }) => {
         return (
             <View className="flex-row justify-between px-2 mb-4">
@@ -123,24 +148,24 @@ const EditProductScreen = () => {
         
         return (
             <View className="py-4">
-                <ProductGridSkeleton itemsCount={2} columns={2} />
+                <ProductGridSkeleton 
+                    itemsCount={2} 
+                    columns={2} 
+                    showSearchAndCategories={false} 
+                />
             </View>
         )
     }, [loadingMore])
 
-    // Render empty state or loading skeleton
+    // Render empty state (only when not loading and no products)
     const renderEmptyComponent = useCallback(() => {
-        if (loading) {
-            return <ProductGridSkeleton itemsCount={6} columns={2} />
-        }
-        
         return (
             <View className="flex-1 justify-center items-center mt-20">
                 <Text className="text-gray-500 text-lg">No products found</Text>
                 <Text className="text-gray-400 mt-2">Add some products to edit</Text>
             </View>
         )
-    }, [loading])
+    }, [])
 
     const handleEndReached = useCallback(() => {
         if (!loadingMore && hasMore) {
