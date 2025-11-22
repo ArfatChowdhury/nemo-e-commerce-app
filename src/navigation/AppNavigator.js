@@ -26,7 +26,11 @@ function MyTabs() {
     const cartItems = useSelector(state => state.productForm.cartItems)
     const cartItemCount = cartItems.length
     return (
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
+        <Tab.Navigator screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: '#f97316',
+            tabBarInactiveTintColor: 'gray',
+        }}>
             <Tab.Screen name="Home" component={HomeScreen} options={{
                 tabBarIcon: ({ color, size, focused }) => (
                     <Ionicons name="home" size={size} color={color} />

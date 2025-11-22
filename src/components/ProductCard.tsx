@@ -8,7 +8,7 @@ const ProductCard = ({ item, onPress }) => {
   const [imageError, setImageError] = useState(false);
   const navigation = useNavigation()
 
-  console.log('🖼️ Product Image URL:',item.images?.[0]);
+  console.log('🖼️ Product Image URL:', item.images?.[0]);
 
   const handleImageError = (e) => {
     console.log('❌ Image failed to load:', e.nativeEvent.error);
@@ -41,11 +41,11 @@ const ProductCard = ({ item, onPress }) => {
 
   const handleProductPress = useCallback(() => {
     navigation.navigate("productDetails", {
-      productId: item._id 
+      productId: item._id
     });
   }, [navigation, item._id]);
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-48"
       onPress={() => handleProductPress(item._id)}
       accessible={true}
@@ -63,10 +63,10 @@ const ProductCard = ({ item, onPress }) => {
           </View>
         ) : (
           <View className="relative w-full h-full">
-            <Image 
-              source={{ 
-                uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png' 
-              }} 
+            <Image
+              source={{
+                uri: item.images?.[0] || 'https://placehold.co/600x400/000000/FFFFFF/png'
+              }}
               className="w-full h-full rounded-t-xl"
               resizeMode="cover"
               onError={handleImageError}
@@ -75,7 +75,7 @@ const ProductCard = ({ item, onPress }) => {
             />
             {imageLoading && (
               <View className="absolute inset-0 bg-gray-200 justify-center items-center">
-                <ActivityIndicator size="small" color="#3B82F6" />
+                <ActivityIndicator size="small" color="#f97316" />
               </View>
             )}
           </View>
@@ -85,7 +85,7 @@ const ProductCard = ({ item, onPress }) => {
       {/* Product Details */}
       <View className="p-3">
         {/* Brand Name */}
-        <Text 
+        <Text
           className="text-xs text-gray-600 mb-1"
           accessibilityRole="text"
           accessibilityLabel={`Brand: ${item.brandName}`}
@@ -94,8 +94,8 @@ const ProductCard = ({ item, onPress }) => {
         </Text>
 
         {/* Product Name */}
-        <Text 
-          className="text-sm font-bold mb-1.5 text-gray-800" 
+        <Text
+          className="text-sm font-bold mb-1.5 text-gray-800"
           numberOfLines={2}
           accessibilityRole="text"
         >
@@ -103,17 +103,17 @@ const ProductCard = ({ item, onPress }) => {
         </Text>
 
         {/* Price */}
-        <Text 
-          className="text-base font-bold text-blue-500 mb-2"
+        <Text
+          className="text-base font-bold text-orange-500 mb-2"
           accessibilityRole="text"
           accessibilityLabel={`Price: ${formatPrice(item.price)}`}
         >
           {formatPrice(item.price)}
         </Text>
-        
+
         {/* Stock Status */}
         <View className="mb-2">
-          <Text 
+          <Text
             className={`
               text-xs font-medium
               ${item.stock > 10 ? 'text-green-500' : 'text-red-500'}
@@ -124,16 +124,16 @@ const ProductCard = ({ item, onPress }) => {
             {item.stock > 10 ? 'In Stock' : `Only ${item.stock} left`}
           </Text>
         </View>
-        
+
         {/* Color Options */}
         {item.colors && item.colors.length > 0 && (
-          <View 
+          <View
             className="flex-row items-center"
             accessibilityRole="text"
             accessibilityLabel={`Available in ${item.colors.length} colors`}
           >
             {item.colors.slice(0, 3).map((color, index) => (
-              <View 
+              <View
                 key={`${color.value}-${index}`}
                 className="w-3 h-3 rounded-full mr-1 border border-gray-200"
                 style={{ backgroundColor: color.value }}
@@ -142,7 +142,7 @@ const ProductCard = ({ item, onPress }) => {
               />
             ))}
             {item.colors.length > 3 && (
-              <Text 
+              <Text
                 className="text-xs text-gray-600 ml-1"
                 accessibilityRole="text"
               >
@@ -155,33 +155,5 @@ const ProductCard = ({ item, onPress }) => {
     </TouchableOpacity>
   );
 };
-
-// Prop Types validation
-// ProductCard.propTypes = {
-//   item: PropTypes.shape({
-//     images: PropTypes.arrayOf(PropTypes.string),
-//     brandName: PropTypes.string,
-//     productName: PropTypes.string.isRequired,
-//     price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-//     stock: PropTypes.number,
-//     colors: PropTypes.arrayOf(PropTypes.shape({
-//       value: PropTypes.string
-//     }))
-//   }).isRequired,
-//   onPress: PropTypes.func.isRequired
-// };
-
-// // Default props
-// ProductCard.defaultProps = {
-//   item: {
-//     images: [],
-//     brandName: '',
-//     productName: '',
-//     price: 0,
-//     stock: 0,
-//     colors: []
-//   },
-//   onPress: () => {}
-// };
 
 export default React.memo(ProductCard);

@@ -36,13 +36,12 @@ const CheckoutScreen = () => {
     }
 
     const handleProceedToPayment = () => {
-        // Basic validation
+
         if (!formData.fullName || !formData.address || !formData.city || !formData.zipCode || !formData.phone) {
             alert('Please fill in all fields')
             return
         }
 
-        // Navigate to Payment Screen (we'll create this next)
         navigation.navigate('Payment', {
             shippingAddress: formData,
             totals: totals
@@ -51,7 +50,7 @@ const CheckoutScreen = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
-            <HeaderBar title="Checkout" />
+            <HeaderBar iconName='arrow-back' title="Checkout" />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -143,7 +142,7 @@ const CheckoutScreen = () => {
 
                             <View className="flex-row justify-between">
                                 <Text className="text-lg font-bold text-gray-900">Total</Text>
-                                <Text className="text-lg font-bold text-blue-600">${totals.total.toFixed(2)}</Text>
+                                <Text className="text-lg font-bold text-orange-600">${totals.total.toFixed(2)}</Text>
                             </View>
                         </View>
                     </View>
@@ -155,7 +154,7 @@ const CheckoutScreen = () => {
             <View className="p-4 bg-white border-t border-gray-200">
                 <TouchableOpacity
                     onPress={handleProceedToPayment}
-                    className="bg-blue-500 py-4 rounded-2xl shadow-lg shadow-blue-500/30"
+                    className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
                 >
                     <Text className="text-white text-center font-bold text-lg">
                         Proceed to Payment

@@ -105,8 +105,8 @@ const CartScreen = () => {
           onPress={handleHeaderCheckout}
           className="flex-row items-center"
         >
-          <Ionicons name="card-outline" size={20} color="#3B82F6" />
-          <Text className="text-blue-500 font-medium ml-1">Checkout</Text>
+          <Ionicons name="card-outline" size={20} color="#f97316" />
+          <Text className="text-orange-500 font-medium ml-1">Checkout</Text>
         </TouchableOpacity>
       </View>
 
@@ -151,7 +151,7 @@ const CartScreen = () => {
                     </View>
                   )}
 
-                  <Text className="text-lg font-bold text-blue-600 mb-3">
+                  <Text className="text-lg font-bold text-orange-600 mb-3">
                     ${item.price}
                   </Text>
 
@@ -229,7 +229,7 @@ const CartScreen = () => {
 
             <View className="flex-row justify-between">
               <Text className="text-lg font-bold text-gray-900">Total</Text>
-              <Text className="text-lg font-bold text-blue-600">
+              <Text className="text-lg font-bold text-orange-600">
                 ${calculateTotal().toFixed(2)}
               </Text>
             </View>
@@ -241,7 +241,7 @@ const CartScreen = () => {
       <View className="px-4 pb-6 pt-4 bg-white border-t border-gray-200">
         <TouchableOpacity
           onPress={handleCheckout}
-          className="bg-blue-500 py-4 rounded-2xl shadow-lg shadow-blue-500/30"
+          className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
         >
           <Text className="text-white text-center font-bold text-lg">
             Proceed to Checkout - ${calculateTotal().toFixed(2)}
