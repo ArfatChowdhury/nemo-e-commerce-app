@@ -6,13 +6,13 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useDispatch } from 'react-redux'
 import { clearCart } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
-
+import { setOrderHistory } from '../Store/slices/productFormSlice'
 const PaymentScreen = () => {
     const navigation = useNavigation()
     const route = useRoute()
     const dispatch = useDispatch()
 
-    const { totals, shippingAddress } = route.params || {}
+    const { totals, shippingAddress, cartItems } = route.params || {}
 
     const [cardDetails, setCardDetails] = useState({
         cardNumber: '',
@@ -50,6 +50,9 @@ const PaymentScreen = () => {
                                         text: 'OK',
                                         onPress: () => {
                                             dispatch(clearCart())
+                                            dispatch(setOrderHistory({
+                                                cartItems
+                                            }))
                                             navigation.reset({
                                                 index: 0,
                                                 routes: [{ name: 'bottomTabs' }],

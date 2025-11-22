@@ -44,7 +44,8 @@ const CheckoutScreen = () => {
 
         navigation.navigate('Payment', {
             shippingAddress: formData,
-            totals: totals
+            totals: totals,
+            cartItems: cartItems
         })
     }
 

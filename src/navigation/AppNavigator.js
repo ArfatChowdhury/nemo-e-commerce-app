@@ -16,6 +16,8 @@ import EditFormScreen from "../screens/EditFormScreen";
 import CheckoutScreen from "../screens/CheckoutScreen";
 import PaymentScreen from "../screens/PaymentScreen";
 import { useSelector } from "react-redux";
+import WishlistScreen from "../screens/WishlistScreen";
+import OrderHistoryScreen from "../screens/OrderHistoryScreen";
 
 
 const Tab = createBottomTabNavigator()
@@ -94,6 +96,8 @@ export default function AppNavigator() {
                 <Stack.Screen name="EditForm" component={EditFormScreen} />
                 <Stack.Screen name="Checkout" component={CheckoutScreen} />
                 <Stack.Screen name="Payment" component={PaymentScreen} />
+                <Stack.Screen name="Wishlist" component={WishlistScreen} />
+                <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
 
             </Stack.Navigator>
         </NavigationContainer>

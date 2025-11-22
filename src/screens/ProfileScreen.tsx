@@ -6,9 +6,9 @@ import { StackNavigationProp } from '@react-navigation/stack'
 
 type RootStackParamList = {
   addProduct: undefined;
-  messages: undefined;
-  settings: undefined;
-  
+  productManagement: undefined;
+  Wishlist: undefined;
+  OrderHistory: undefined;
 }
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'addProduct'>;
@@ -16,12 +16,13 @@ type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'addP
 interface ProfileScreenProps {
   navigation: ProfileScreenNavigationProp;
 }
+
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   return (
     <View>
-      <ProfileButton iconName='bag-handle-outline' name='Product Management' onPress={() => navigation.navigate('productManagement')}/>
-      <ProfileButton name='Messages' iconName='mail-outline' onPress={() => navigation.navigate('messages')} />
-      <ProfileButton iconName='settings-outline' name='Settings' onPress={() => navigation.navigate('settings')} />
+      <ProfileButton iconName='bag-handle-outline' name='Product Management' onPress={() => navigation.navigate('productManagement')} />
+      <ProfileButton name='Wishlist' iconName='heart-outline' onPress={() => navigation.navigate('Wishlist')} />
+      <ProfileButton iconName='receipt-outline' name='Order History' onPress={() => navigation.navigate('OrderHistory')} />
     </View>
   )
 }

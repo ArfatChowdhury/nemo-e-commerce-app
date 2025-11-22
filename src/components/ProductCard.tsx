@@ -1,12 +1,17 @@
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-// import PropTypes from 'prop-types';
+import { Ionicons } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { setWishlists } from '../Store/slices/productFormSlice';
 
 const ProductCard = ({ item, onPress }) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const navigation = useNavigation()
+  const wishlist = useSelector((state) => state.productForm.wishlists);
+
+  const dispatch = useDispatch();
 
   console.log('🖼️ Product Image URL:', item.images?.[0]);
 
@@ -44,6 +49,17 @@ const ProductCard = ({ item, onPress }) => {
       productId: item._id
     });
   }, [navigation, item._id]);
+
+  const handleAddToWishlist = (item) => {
+    console.log('Added to wishlist:', item);
+    dispatch(setWishlists(item));
+  };
+
+  const checkItemExistsInWishlist = (productId) => {
+    return wishlist.find((item) => item._id === productId);
+  };
+
+
   return (
     <TouchableOpacity
       className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-48"
@@ -151,6 +167,14 @@ const ProductCard = ({ item, onPress }) => {
             )}
           </View>
         )}
+        <TouchableOpacity
+          onPress={() => handleAddToWishlist(item)}
+          className="absolute top-2 right-2"
+          accessibilityRole="button"
+          accessibilityLabel="Add to wishlist"
+        >
+          <Ionicons name={checkItemExistsInWishlist(item._id) ? "heart" : "heart-outline"} size={24} color="red" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );

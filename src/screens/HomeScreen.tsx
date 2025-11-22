@@ -58,6 +58,7 @@ const HomeScreen = React.memo(() => {
   }, [])
 
 
+
   const renderCategoryItem = useCallback(({ item }) => (
     <View className={`mr-3 rounded-lg shadow-sm ${selectedCategory === item ? 'bg-orange-500' : 'bg-white'
       }`}>

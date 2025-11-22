@@ -14,7 +14,9 @@ const productFormSlice = createSlice({
         products: [],
         cartItems: [],
         loading: false,
-        error: null
+        error: null,
+        wishlists: [],
+        orderHistory: [],
     },
     reducers: {
         updateField: (state, action) => {
@@ -58,26 +60,26 @@ const productFormSlice = createSlice({
         setLoading: (state, action) => {
             state.loading = action.payload
         },
-        setError: (state, action) =>{
+        setError: (state, action) => {
             state.error = action.payload
         },
-        setProducts: (state, action) =>{
+        setProducts: (state, action) => {
             state.products = action.payload
         },
         addToCart: (state, action) => {
             const newItem = action.payload;
-            
+
             const cartItemId = `${newItem._id}-${newItem.selectedColor ? newItem.selectedColor.name : 'no-color'}`;
-            
-            const existingItemIndex = state.cartItems.findIndex(item => 
+
+            const existingItemIndex = state.cartItems.findIndex(item =>
                 item.cartItemId === cartItemId
             );
-            
+
             if (existingItemIndex >= 0) {
-             
+
                 state.cartItems[existingItemIndex].quantity += 1;
             } else {
-                
+
                 state.cartItems.push({
                     ...newItem,
                     cartItemId: cartItemId,
@@ -110,20 +112,26 @@ const productFormSlice = createSlice({
         },
         clearCart: (state) => {
             state.cartItems = [];
+        },
+        setWishlists: (state, action) => {
+            state.wishlists.push(action.payload)
+        },
+        setOrderHistory: (state, action) => {
+            state.orderHistory.push(action.payload)
         }
     }
 });
 
 export const fetchProducts = () => {
-    return async(dispatch) =>{
-        try{
+    return async (dispatch) => {
+        try {
             dispatch(setLoading(true))
             dispatch(setError(null))
 
             const response = await fetch('https://backend-of-nemo.vercel.app/products')
             const data = await response.json()
             dispatch(setProducts(data.data || data))
-        } catch(error) {
+        } catch (error) {
             console.error('Error fetching products:', error)
             dispatch(setError(error.message))
         } finally {
@@ -132,24 +140,26 @@ export const fetchProducts = () => {
     }
 }
 
-export const { 
-    updateField, 
-    setColors, 
-    setCategory, 
-    resetForm, 
-    addProduct, 
-    addImage, 
+export const {
+    updateField,
+    setColors,
+    setCategory,
+    resetForm,
+    addProduct,
+    addImage,
     setImages,
     removeImage,
-    setMainImage, 
-    setProducts, 
-    setLoading, 
-    setError, 
+    setMainImage,
+    setProducts,
+    setLoading,
+    setError,
     addToCart,
     removeFromCart,
     increaseQuantity,
     decreaseQuantity,
-    clearCart
+    clearCart,
+    setWishlists,
+    setOrderHistory
 } = productFormSlice.actions;
 
 export default productFormSlice.reducer;
