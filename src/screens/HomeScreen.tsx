@@ -1,8 +1,8 @@
 import { View, Text, TextInput, VirtualizedList, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native'
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import ProductCard from '../components/ProductCard'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchProducts } from '../Store/slices/productFormSlice'
+import { fetchProducts, Product } from '../Store/slices/productFormSlice'
+import { useAppDispatch, useAppSelector } from '../Store/hooks'
 import { Ionicons } from '@expo/vector-icons'
 import ProductGridSkeleton from '../components/ProductGridSkeleton'
 
@@ -10,16 +10,16 @@ const ITEMS_PER_PAGE = 10
 const NUM_COLUMNS = 2
 
 const HomeScreen = React.memo(() => {
-  const loading = useSelector(state => state.productForm.loading)
-  const products = useSelector(state => state.productForm.products)
-  const error = useSelector(state => state.productForm.error)
-  const dispatch = useDispatch()
+  const loading = useAppSelector(state => state.productForm.loading)
+  const products = useAppSelector(state => state.productForm.products)
+  const error = useAppSelector(state => state.productForm.error)
+  const dispatch = useAppDispatch()
 
   const [selectedCategory, setSelectedCategory] = useState('Trending')
   const [searchQuery, setSearchQuery] = useState('')
 
 
-  const [displayedProducts, setDisplayedProducts] = useState([])
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -89,12 +89,12 @@ const HomeScreen = React.memo(() => {
     setSelectedCategory(category)
   }, [])
 
-  const handleProductPress = useCallback((product: any) => {
+  const handleProductPress = useCallback((product: Product) => {
     console.log('Product pressed:', product)
     // navigation.navigate('ProductDetails', { product })
   }, [])
 
-  const renderCategoryItem = useCallback(({ item }) => (
+  const renderCategoryItem = useCallback(({ item }: { item: string }) => (
     <View className={`mr-3 rounded-lg shadow-sm ${selectedCategory === item ? 'bg-orange-500' : 'bg-white'
       }`}>
       <TouchableOpacity
@@ -109,14 +109,14 @@ const HomeScreen = React.memo(() => {
     </View>
   ), [handleCategoryPress, selectedCategory])
 
-  const keyCategoryExtractor = useCallback((item, index) => index.toString(), [])
+  const keyCategoryExtractor = useCallback((item: string, index: number) => index.toString(), [])
 
 
   const getItemCount = useCallback(() => {
     return Math.ceil(displayedProducts.length / NUM_COLUMNS)
   }, [displayedProducts.length])
 
-  const getItem = useCallback((data, index) => {
+  const getItem = useCallback((data: Product[], index: number) => {
     const rowIndex = index
     const firstProduct = displayedProducts[rowIndex * NUM_COLUMNS]
     const secondProduct = displayedProducts[rowIndex * NUM_COLUMNS + 1]
@@ -128,7 +128,7 @@ const HomeScreen = React.memo(() => {
     }
   }, [displayedProducts])
 
-  const renderItem = useCallback(({ item }) => {
+  const renderItem = useCallback(({ item }: { item: { firstProduct: Product, secondProduct: Product, rowIndex: number } }) => {
     return (
       <View className="flex-row justify-between px-2 mb-4">
         {/* First Product */}

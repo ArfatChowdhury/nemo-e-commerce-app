@@ -3,15 +3,15 @@ import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { setWishlists } from '../Store/slices/productFormSlice';
+import { setWishlists, Product } from '../Store/slices/productFormSlice';
 import { useAppDispatch, useAppSelector } from '../Store/hooks';
 import { RootStackParamList } from '../navigation/types';
 
 type ProductCardNavigationProp = StackNavigationProp<RootStackParamList>;
 
 interface ProductCardProps {
-  item: any;
-  onPress: (productId: string) => void;
+  item: Product;
+  onPress?: (product: Product) => void;
 }
 
 const ProductCard = ({ item, onPress }: ProductCardProps) => {
@@ -53,10 +53,13 @@ const ProductCard = ({ item, onPress }: ProductCardProps) => {
   };
 
   const handleProductPress = useCallback(() => {
+    if (onPress) {
+      onPress(item);
+    }
     navigation.navigate("productDetails", {
       productId: item._id
     });
-  }, [navigation, item._id]);
+  }, [navigation, item, onPress]);
 
   const handleAddToWishlist = (item: any) => {
     console.log('Added to wishlist:', item);

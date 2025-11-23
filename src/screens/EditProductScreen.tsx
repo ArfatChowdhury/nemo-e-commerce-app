@@ -2,22 +2,25 @@ import { View, Text, VirtualizedList, Alert } from 'react-native'
 import React, { useEffect, useCallback, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../navigation/types'
 import HeaderBar from '../components/HeaderBar'
 import EditProductCard from '../components/EditProductCard'
-import { fetchProducts } from '../Store/slices/productFormSlice'
+import { fetchProducts, Product } from '../Store/slices/productFormSlice'
 import ProductGridSkeleton from '../components/ProductGridSkeleton'
+import { useAppDispatch, useAppSelector } from '../Store/hooks'
 
 const ITEMS_PER_PAGE = 10
 const NUM_COLUMNS = 2
 
 const EditProductScreen = () => {
-    const navigation = useNavigation()
-    const dispatch = useDispatch()
-    const allProducts = useSelector(state => state.productForm.products)
-    const loading = useSelector(state => state.productForm.loading)
-    const error = useSelector(state => state.productForm.error)
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+    const dispatch = useAppDispatch()
+    const allProducts = useAppSelector(state => state.productForm.products)
+    const loading = useAppSelector(state => state.productForm.loading)
+    const error = useAppSelector(state => state.productForm.error)
 
-    const [displayedProducts, setDisplayedProducts] = useState([])
+    const [displayedProducts, setDisplayedProducts] = useState<Product[]>([])
     const [currentPage, setCurrentPage] = useState(1)
     const [loadingMore, setLoadingMore] = useState(false)
     const [hasMore, setHasMore] = useState(true)
@@ -37,15 +40,14 @@ const EditProductScreen = () => {
         }
     }, [allProducts])
 
-    // Show full page skeleton during initial loading
     if (loading && displayedProducts.length === 0) {
         return (
             <View className="flex-1 bg-gray-50">
                 <HeaderBar iconName='arrow-back' title='Edit Product' />
-                <ProductGridSkeleton 
-                    itemsCount={8} 
-                    columns={2} 
-                    showSearchAndCategories={false} 
+                <ProductGridSkeleton
+                    itemsCount={8}
+                    columns={2}
+                    showSearchAndCategories={false}
                 />
             </View>
         )
@@ -71,12 +73,12 @@ const EditProductScreen = () => {
         if (loadingMore || !hasMore) return
 
         setLoadingMore(true)
-        
+
         setTimeout(() => {
             const nextPage = currentPage + 1
             const endIndex = nextPage * ITEMS_PER_PAGE
             const newProducts = allProducts.slice(0, endIndex)
-            
+
             setDisplayedProducts(newProducts)
             setCurrentPage(nextPage)
             setHasMore(endIndex < allProducts.length)
@@ -84,15 +86,15 @@ const EditProductScreen = () => {
         }, 500)
     }, [currentPage, loadingMore, hasMore, allProducts])
 
-    const handleProductPress = useCallback((product) => {
+    const handleProductPress = useCallback((product: Product) => {
         navigation.navigate("productDetails", { productId: product._id })
     }, [navigation])
 
-    const handleEditProduct = useCallback((product) => {
-       navigation.navigate('EditForm', { productId: product._id })
+    const handleEditProduct = useCallback((product: Product) => {
+        navigation.navigate('EditForm', { productId: product._id })
     }, [navigation])
 
-    const handleDeleteProduct = useCallback((productId) => {
+    const handleDeleteProduct = useCallback((productId: string) => {
         Alert.alert('Success', 'Product deleted successfully!')
     }, [])
 
@@ -100,11 +102,11 @@ const EditProductScreen = () => {
         return Math.ceil(displayedProducts.length / NUM_COLUMNS)
     }, [displayedProducts.length])
 
-    const getItem = useCallback((data, index) => {
+    const getItem = useCallback((data: Product[], index: number) => {
         const rowIndex = index
         const firstProduct = displayedProducts[rowIndex * NUM_COLUMNS]
         const secondProduct = displayedProducts[rowIndex * NUM_COLUMNS + 1]
-        
+
         return {
             firstProduct,
             secondProduct,
@@ -112,13 +114,13 @@ const EditProductScreen = () => {
         }
     }, [displayedProducts])
 
-    const renderItem = useCallback(({ item, index }) => {
+    const renderItem = useCallback(({ item, index }: { item: { firstProduct: Product, secondProduct: Product, rowIndex: number }, index: number }) => {
         return (
             <View className="flex-row justify-between px-2 mb-4">
                 {/* First Product */}
                 <View className="w-[48%]">
                     {item.firstProduct && (
-                        <EditProductCard 
+                        <EditProductCard
                             item={item.firstProduct}
                             onPress={handleProductPress}
                             onEdit={handleEditProduct}
@@ -126,11 +128,11 @@ const EditProductScreen = () => {
                         />
                     )}
                 </View>
-                
+
                 {/* Second Product */}
                 <View className="w-[48%]">
                     {item.secondProduct && (
-                        <EditProductCard 
+                        <EditProductCard
                             item={item.secondProduct}
                             onPress={handleProductPress}
                             onEdit={handleEditProduct}
@@ -145,13 +147,13 @@ const EditProductScreen = () => {
     // Render loading more skeleton
     const renderFooter = useCallback(() => {
         if (!loadingMore) return null
-        
+
         return (
             <View className="py-4">
-                <ProductGridSkeleton 
-                    itemsCount={2} 
-                    columns={2} 
-                    showSearchAndCategories={false} 
+                <ProductGridSkeleton
+                    itemsCount={2}
+                    columns={2}
+                    showSearchAndCategories={false}
                 />
             </View>
         )
@@ -176,7 +178,7 @@ const EditProductScreen = () => {
     return (
         <View className="flex-1 bg-gray-50">
             <HeaderBar iconName='arrow-back' title='Edit Product' />
-            
+
             <VirtualizedList
                 data={displayedProducts}
                 getItemCount={getItemCount}

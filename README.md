@@ -31,6 +31,11 @@ A modern, full-featured e-commerce mobile application built with **React Native*
 -   **Icons**: Expo Vector Icons (Ionicons)
 -   **Backend**: Custom Node.js/Express API (Hosted on Vercel)
 
+## 🔗 Backend Repository
+
+The backend server for this application can be found here:
+[https://github.com/ArfatChowdhury/backend-of-nemo](https://github.com/ArfatChowdhury/backend-of-nemo)
+
 ## 🏃‍♂️ Getting Started
 
 ### Prerequisites
