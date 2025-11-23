@@ -12,30 +12,40 @@ import {
 import React, { useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import {
   updateField,
   resetForm,
   fetchProducts,
+  Product,
+  ColorOption
 } from "../Store/slices/productFormSlice";
 import NewImagePicker from "../components/ImagePicker";
 import { API_BASE_URL, IMGBB_API_KEY } from "../constants/apiConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppSelector, useAppDispatch } from "../Store/hooks";
 
 const BASE_URL = API_BASE_URL;
 
-const EditFormScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const dispatch = useDispatch();
-  const formData = useSelector((state) => state.productForm);
-  const products = useSelector(state => state.productForm.products)
+type RootStackParamList = {
+  EditForm: { productId: string };
+  colorSelection: undefined;
+  category: undefined;
+};
 
-  // Get the product data from navigation params
+type EditFormScreenRouteProp = RouteProp<RootStackParamList, 'EditForm'>;
+
+const EditFormScreen = () => {
+  const navigation = useNavigation<any>();
+  const route = useRoute<EditFormScreenRouteProp>();
+  const dispatch = useAppDispatch();
+  const formData = useAppSelector((state) => state.productForm);
+  const products = useAppSelector(state => state.productForm.products)
+
+
   const { productId } = route.params || {};
 
-  const product = products.find(p => p._id === productId);
+  const product = products.find((p: Product) => p._id === productId);
 
 
   useEffect(() => {
@@ -51,14 +61,15 @@ const EditFormScreen = () => {
     }
   }, [product, dispatch]);
 
-  // ImgBB Upload
-  const uploadImageToImgBB = async (uri) => {
+
+  const uploadImageToImgBB = async (uri: string) => {
     try {
       const data = new FormData();
       const fileName = uri.split("/").pop();
-      const match = /\.(\w+)$/.exec(fileName);
+      const match = /\.(\w+)$/.exec(fileName || "");
       const type = match ? `image/${match[1]}` : "image";
 
+      // @ts-ignore
       data.append("image", {
         uri,
         name: fileName,
@@ -83,15 +94,14 @@ const EditFormScreen = () => {
     }
   };
 
-  const uploadAllImages = async (images) => {
+  const uploadAllImages = async (images: string[]) => {
     const urls = [];
     for (const img of images) {
-      // Only upload new images (local URIs), keep existing URLs
+
       if (img.startsWith('file://') || img.startsWith('http://') || img.startsWith('https://')) {
         const uploaded = await uploadImageToImgBB(img);
         urls.push(uploaded);
       } else {
-        // Keep existing image URLs
         urls.push(img);
       }
     }
@@ -102,84 +112,78 @@ const EditFormScreen = () => {
   const validateForm = () => {
     if (!formData.productName.trim()) return "Product name required";
     if (!formData.brandName.trim()) return "Brand name required";
-    if (!formData.price || isNaN(formData.price)) return "Valid price required";
-    if (!formData.stock || isNaN(formData.stock))
+    if (!formData.price || isNaN(Number(formData.price))) return "Valid price required";
+    if (!formData.stock || isNaN(Number(formData.stock)))
       return "Valid stock required";
     if (!formData.category.trim()) return "Category is required";
     if (!formData.images.length) return "At least one image required";
     return null;
   };
 
- 
- 
-const handleUpdate = async () => {
-  const error = validateForm();
-  if (error) return Alert.alert("Error", error);
 
-  try {
-    console.log('📤 Starting product update...');
 
-    // Upload new images first
-    console.log('🖼️ Uploading new images to ImgBB...');
-    const uploadedUrls = await uploadAllImages(formData.images);
-    console.log('✅ Images processed:', uploadedUrls);
+  const handleUpdate = async () => {
+    const error = validateForm();
+    if (error) return Alert.alert("Error", error);
 
-   
-    const productData = {
-      productName: formData.productName,
-      price: parseFloat(formData.price), 
-      description: formData.description,
-      brandName: formData.brandName,
-      stock: parseInt(formData.stock), 
-      category: formData.category,
-      colors: formData.colors,
-      images: uploadedUrls,
-      updatedAt: new Date().toISOString(),
-    };
+    if (!product) return;
 
-    console.log('📦 Sending update to server (clean data):', productData);
+    try {
+      console.log('📤 Starting product update...');
 
-    // Make the API request to update product
-    const response = await fetch(`${BASE_URL}/products/${product._id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(productData),
-    });
+      // Upload new images first
+      console.log('🖼️ Uploading new images to ImgBB...');
+      const uploadedUrls = await uploadAllImages(formData.images);
+      console.log('✅ Images processed:', uploadedUrls);
 
-   
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const textResponse = await response.text();
-      console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
-      throw new Error(`Server error: ${response.status} - ${response.statusText}`);
+
+      const productData = {
+        productName: formData.productName,
+        price: parseFloat(formData.price),
+        description: formData.description,
+        brandName: formData.brandName,
+        stock: parseInt(formData.stock),
+        category: formData.category,
+        colors: formData.colors,
+        images: uploadedUrls,
+        updatedAt: new Date().toISOString(),
+      };
+      const response = await fetch(`${BASE_URL}/products/${product._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(productData),
+      });
+
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
+        throw new Error(`Server error: ${response.status} - ${response.statusText}`);
+      }
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        console.log('❌ Server error response:', json);
+        throw new Error(json.message || `HTTP error! status: ${response.status}`);
+      }
+      dispatch(fetchProducts());
+      dispatch(resetForm())
+      Alert.alert("Success", "Product updated successfully!");
+      navigation.goBack();
+
+    } catch (err: any) {
+      console.log('❌ Error updating product:', err);
+      Alert.alert(
+        "Error",
+        err.message || "Failed to update product. Please check your connection and try again."
+      );
     }
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      console.log('❌ Server error response:', json);
-      throw new Error(json.message || `HTTP error! status: ${response.status}`);
-    }
-
-    console.log('✅ Product updated successfully:', json);
-
-  
-    dispatch(fetchProducts());
-    dispatch(resetForm())
-    Alert.alert("Success", "Product updated successfully!");
-    navigation.goBack();
-
-  } catch (err) {
-    console.log('❌ Error updating product:', err);
-    Alert.alert(
-      "Error",
-      err.message || "Failed to update product. Please check your connection and try again."
-    );
-  }
-};
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
@@ -239,52 +243,52 @@ const handleUpdate = async () => {
 
           {/* Images */}
           <View style={{ marginBottom: 24 }}>
-  <Text className="text-lg font-semibold mb-2 text-gray-800">
-    Product Images
-  </Text>
-  <NewImagePicker />
-  
-  {/* Show selected images in small size */}
-  {formData.images.length > 0 && (
-    <View className="mt-3">
-      <Text className="text-green-600 text-sm mb-2">
-        {formData.images.length} image(s) selected
-      </Text>
-      
-      {/* Small image previews */}
-      <View className="flex-row flex-wrap">
-        {formData.images.map((image, index) => (
-          <View key={index} className="mr-3 mb-3 relative">
-            <View className="w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">
-              <Image
-                source={{ uri: image }}
-                className="w-full h-full"
-                resizeMode="cover"
-                onError={() => console.log('Image failed to load:', image)}
-              />
-            </View>
-            
-            {/* Remove button */}
-            <TouchableOpacity 
-              onPress={() => {
-                const updatedImages = formData.images.filter((_, i) => i !== index);
-                dispatch(updateField({ field: "images", value: updatedImages }));
-              }}
-              className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-white shadow-sm"
-            >
-              <Ionicons name="close" size={12} color="white" />
-            </TouchableOpacity>
-            
-            {/* Image number badge */}
-            <View className="absolute top-1 left-1 bg-black/50 px-1 rounded">
-              <Text className="text-white text-xs">{index + 1}</Text>
-            </View>
+            <Text className="text-lg font-semibold mb-2 text-gray-800">
+              Product Images
+            </Text>
+            <NewImagePicker />
+
+            {/* Show selected images in small size */}
+            {formData.images.length > 0 && (
+              <View className="mt-3">
+                <Text className="text-green-600 text-sm mb-2">
+                  {formData.images.length} image(s) selected
+                </Text>
+
+                {/* Small image previews */}
+                <View className="flex-row flex-wrap">
+                  {formData.images.map((image, index) => (
+                    <View key={index} className="mr-3 mb-3 relative">
+                      <View className="w-20 h-20 rounded-lg border border-gray-200 overflow-hidden">
+                        <Image
+                          source={{ uri: image }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                          onError={() => console.log('Image failed to load:', image)}
+                        />
+                      </View>
+
+                      {/* Remove button */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          const updatedImages = formData.images.filter((_, i) => i !== index);
+                          dispatch(updateField({ field: "images", value: updatedImages }));
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-white shadow-sm"
+                      >
+                        <Ionicons name="close" size={12} color="white" />
+                      </TouchableOpacity>
+
+                      {/* Image number badge */}
+                      <View className="absolute top-1 left-1 bg-black/50 px-1 rounded">
+                        <Text className="text-white text-xs">{index + 1}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
           </View>
-        ))}
-      </View>
-    </View>
-  )}
-</View>
 
           {/* Brand */}
           <View style={{ marginBottom: 20 }}>

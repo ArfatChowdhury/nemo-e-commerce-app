@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Type definitions
-interface ColorOption {
+// Type definitions
+export interface ColorOption {
     name: string;
     value: string;
 }
 
-interface Product {
+export interface Product {
     _id: string;
     productName: string;
     price: number;

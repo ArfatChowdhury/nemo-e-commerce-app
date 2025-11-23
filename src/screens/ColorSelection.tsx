@@ -1,4 +1,4 @@
-// screens/ColorSelection.js
+// screens/ColorSelection.tsx
 import { View, Text, FlatList, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import HeaderBar from '../components/HeaderBar'
@@ -7,8 +7,13 @@ import ColorCard from '../components/ColorCard'
 import { setColors } from '../Store/slices/productFormSlice'
 import { useAppDispatch } from '../Store/hooks'
 
+// Define the Color interface
+interface Color {
+    name: string
+    value: string
+}
 
-const colors = [
+const colors: Color[] = [
     { name: 'Red', value: '#FF0000' },
     { name: 'Blue', value: '#0000FF' },
     { name: 'Green', value: '#00FF00' },
@@ -25,15 +30,14 @@ const colors = [
 
 const ColorSelection = () => {
     const navigation = useNavigation()
-
     const dispatch = useAppDispatch()
 
-    const [selectedColors, setSelectedColors] = useState([])
+    const [selectedColors, setSelectedColors] = useState<Color[]>([])
 
-    const handleColor = (color: any) => {
-        setSelectedColors((prev: any) => {
-            if (prev.some((c: any) => c.name === color.name)) {
-                return prev.filter((c: any) => c.name !== color.name)
+    const handleColor = (color: Color) => {
+        setSelectedColors((prev) => {
+            if (prev.some((c) => c.name === color.name)) {
+                return prev.filter((c) => c.name !== color.name)
             } else {
                 return [...prev, color]
             }
@@ -62,7 +66,7 @@ const ColorSelection = () => {
                     <ColorCard
                         color={item}
                         onPress={handleColor}
-                        isSelected={selectedColors.some((c: any) => c.name === item.name)}
+                        isSelected={selectedColors.some((c) => c.name === item.name)}
                     />
                 )}
                 numColumns={2}
