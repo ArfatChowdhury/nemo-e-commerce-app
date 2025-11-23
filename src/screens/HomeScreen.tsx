@@ -1,13 +1,13 @@
-import { View, Text, TextInput, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Text, TextInput, VirtualizedList, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native'
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import ProductCard from '../components/ProductCard'
-import { API_BASE_URL } from '../constants/apiConfig'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchProducts } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
 import ProductGridSkeleton from '../components/ProductGridSkeleton'
-// import ProductGridSkeleton from '../components/ProductGridSkeleton'
 
+const ITEMS_PER_PAGE = 10
+const NUM_COLUMNS = 2
 
 const HomeScreen = React.memo(() => {
   const loading = useSelector(state => state.productForm.loading)
@@ -15,9 +15,14 @@ const HomeScreen = React.memo(() => {
   const error = useSelector(state => state.productForm.error)
   const dispatch = useDispatch()
 
-
   const [selectedCategory, setSelectedCategory] = useState('Trending')
   const [searchQuery, setSearchQuery] = useState('')
+
+
+  const [displayedProducts, setDisplayedProducts] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
 
   const { categories, uniqueCategories } = useMemo(() => {
     const categoryList = products ? products.map(cat => cat.category) : []
@@ -41,12 +46,44 @@ const HomeScreen = React.memo(() => {
     )
   }, [products, searchQuery])
 
+
+  const finalProducts = useMemo(() => {
+    return searchQuery ? searchedProducts : filteredProducts
+  }, [searchQuery, searchedProducts, filteredProducts])
+
   useEffect(() => {
     dispatch(fetchProducts())
   }, [dispatch])
 
-  console.log('🔄 HomeScreen re-render')
 
+  useEffect(() => {
+    if (finalProducts.length > 0) {
+      const initialProducts = finalProducts.slice(0, ITEMS_PER_PAGE)
+      setDisplayedProducts(initialProducts)
+      setHasMore(finalProducts.length > ITEMS_PER_PAGE)
+      setCurrentPage(1)
+    } else {
+      setDisplayedProducts([])
+      setHasMore(false)
+    }
+  }, [finalProducts])
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || !hasMore) return
+
+    setLoadingMore(true)
+
+    setTimeout(() => {
+      const nextPage = currentPage + 1
+      const endIndex = nextPage * ITEMS_PER_PAGE
+      const newProducts = finalProducts.slice(0, endIndex)
+
+      setDisplayedProducts(newProducts)
+      setCurrentPage(nextPage)
+      setHasMore(endIndex < finalProducts.length)
+      setLoadingMore(false)
+    }, 500)
+  }, [currentPage, loadingMore, hasMore, finalProducts])
 
   const handleCategoryPress = useCallback((category: string) => {
     setSelectedCategory(category)
@@ -56,8 +93,6 @@ const HomeScreen = React.memo(() => {
     console.log('Product pressed:', product)
     // navigation.navigate('ProductDetails', { product })
   }, [])
-
-
 
   const renderCategoryItem = useCallback(({ item }) => (
     <View className={`mr-3 rounded-lg shadow-sm ${selectedCategory === item ? 'bg-orange-500' : 'bg-white'
@@ -74,17 +109,74 @@ const HomeScreen = React.memo(() => {
     </View>
   ), [handleCategoryPress, selectedCategory])
 
-  const renderProductItem = useCallback(({ item }) => (
-    <ProductCard
-      item={item}
-      onPress={handleProductPress}
-    />
-  ), [handleProductPress])
-
   const keyCategoryExtractor = useCallback((item, index) => index.toString(), [])
-  const keyProductExtractor = useCallback((item, index) => item._id || item.id || index.toString(), [])
 
-  if (loading) {
+
+  const getItemCount = useCallback(() => {
+    return Math.ceil(displayedProducts.length / NUM_COLUMNS)
+  }, [displayedProducts.length])
+
+  const getItem = useCallback((data, index) => {
+    const rowIndex = index
+    const firstProduct = displayedProducts[rowIndex * NUM_COLUMNS]
+    const secondProduct = displayedProducts[rowIndex * NUM_COLUMNS + 1]
+
+    return {
+      firstProduct,
+      secondProduct,
+      rowIndex
+    }
+  }, [displayedProducts])
+
+  const renderItem = useCallback(({ item }) => {
+    return (
+      <View className="flex-row justify-between px-2 mb-4">
+        {/* First Product */}
+        <View className="w-[48%]">
+          {item.firstProduct && (
+            <ProductCard
+              item={item.firstProduct}
+              onPress={handleProductPress}
+            />
+          )}
+        </View>
+
+        {/* Second Product */}
+        <View className="w-[48%]">
+          {item.secondProduct && (
+            <ProductCard
+              item={item.secondProduct}
+              onPress={handleProductPress}
+            />
+          )}
+        </View>
+      </View>
+    )
+  }, [handleProductPress])
+
+  const renderFooter = useCallback(() => {
+    if (!loadingMore) return null
+
+    return (
+      <View className="py-4">
+        <ProductGridSkeleton
+          itemsCount={2}
+          columns={2}
+          showSearchAndCategories={false}
+        />
+      </View>
+    )
+  }, [loadingMore])
+
+  const renderEmptyComponent = useCallback(() => {
+    return (
+      <View className="flex-1 justify-center items-center mt-20">
+        <Text className="text-gray-500 text-lg">No products found</Text>
+      </View>
+    )
+  }, [])
+
+  if (loading && displayedProducts.length === 0) {
     return (
       <ProductGridSkeleton itemsCount={6} />
     )
@@ -126,21 +218,27 @@ const HomeScreen = React.memo(() => {
       </View>
 
       {/* Products */}
-      <View className="flex-1 px-4">
-        <Text className="text-lg font-bold mb-3">Products in {selectedCategory}</Text>
-        <FlatList
-          data={searchQuery ? searchedProducts : filteredProducts}
-          keyExtractor={keyProductExtractor}
-          renderItem={renderProductItem}
-          numColumns={2}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 12 }}
+      <View className="flex-1 px-2">
+        <Text className="text-lg font-bold mb-3 px-2">Products in {selectedCategory}</Text>
+        <VirtualizedList
+          data={displayedProducts}
+          getItemCount={getItemCount}
+          getItem={getItem}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `row-${index}`}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View className="flex-1 justify-center items-center mt-20">
-              <Text className="text-gray-500 text-lg">No products found</Text>
-            </View>
-          }
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          removeClippedSubviews={true}
+          ListEmptyComponent={renderEmptyComponent}
+          ListFooterComponent={renderFooter}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          contentContainerStyle={{
+            paddingVertical: 8,
+            paddingBottom: 20
+          }}
         />
       </View>
     </View>

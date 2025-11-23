@@ -18,8 +18,8 @@ import PaymentScreen from "../screens/PaymentScreen";
 import { useSelector } from "react-redux";
 import WishlistScreen from "../screens/WishlistScreen";
 import OrderHistoryScreen from "../screens/OrderHistoryScreen";
-import LoginScreen from "../screens/LoginScreen";
-import SignupScreen from "../screens/SignupScreen";
+// import LoginScreen from "../screens/LoginScreen"; // DISABLED - Firebase incompatible with Expo Go
+// import SignupScreen from "../screens/SignupScreen"; // DISABLED - Firebase incompatible with Expo Go
 
 
 const Tab = createBottomTabNavigator()
@@ -100,8 +100,8 @@ export default function AppNavigator() {
                 <Stack.Screen name="Payment" component={PaymentScreen} />
                 <Stack.Screen name="Wishlist" component={WishlistScreen} />
                 <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Signup" component={SignupScreen} />
+                {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
+                {/* <Stack.Screen name="Signup" component={SignupScreen} /> */}
 
             </Stack.Navigator>
         </NavigationContainer>

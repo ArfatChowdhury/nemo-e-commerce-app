@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -19,7 +19,9 @@
           "photosPermission": "The app needs access to your photos to let you upload product images.",
           "cameraPermission": "The app needs access to your camera to take product photos."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": true,
@@ -41,7 +43,6 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ]
-      
     },
     "web": {
       "favicon": "./assets/favicon.png",

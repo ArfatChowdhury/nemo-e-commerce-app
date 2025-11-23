@@ -1,23 +1,30 @@
 // Firebase configuration
-// TODO: Replace these values with your own Firebase project credentials
-// Get these from: Firebase Console > Project Settings > General
-
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+// Lazy initialization to avoid React Native 0.76 new architecture conflicts
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDh08N9bC9lUQVg01IJ1DccB4vBBU9Y9GQ",
+    authDomain: "nemo-e-commerce.firebaseapp.com",
+    projectId: "nemo-e-commerce",
+    storageBucket: "nemo-e-commerce.firebasestorage.app",
+    messagingSenderId: "206111615276",
+    appId: "1:206111615276:web:8cf10da42619d91977e489"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app = null;
+let auth = null;
 
-// Initialize Firebase Authentication
-export const auth = getAuth(app);
+// Lazy initialize Firebase only when auth is actually needed
+export const getFirebaseAuth = async () => {
+    if (!auth) {
+        const { initializeApp } = await import('firebase/app');
+        const { getAuth } = await import('firebase/auth');
 
-export default app;
+        if (!app) {
+            app = initializeApp(firebaseConfig);
+        }
+        auth = getAuth(app);
+    }
+    return auth;
+};
+
+export default getFirebaseAuth;
