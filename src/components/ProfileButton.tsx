@@ -1,8 +1,15 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { ComponentProps } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 
-const ProfileButton = ({ iconName, name, onPress }) => {
+
+interface ProfileButtonProps {
+    iconName: ComponentProps<typeof Ionicons>['name'];
+    name: string;
+    onPress: () => void;
+}
+
+const ProfileButton = ({ iconName, name, onPress }: ProfileButtonProps) => {
     return (
         <TouchableOpacity onPress={onPress}>
             <View className='px-4 py-4 bg-white my-2 space-y-1'>

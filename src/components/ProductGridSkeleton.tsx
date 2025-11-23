@@ -1,28 +1,35 @@
 import React from 'react';
 import { View } from 'react-native';
 
-const ProductGridSkeleton = ({ itemsCount = 6, columns = 2, showSearchAndCategories = true }) => {
+
+interface ProductGridSkeletonProps {
+  itemsCount?: number;
+  columns?: number;
+  showSearchAndCategories?: boolean;
+}
+
+const ProductGridSkeleton = ({ itemsCount = 6, columns = 2, showSearchAndCategories = true }: ProductGridSkeletonProps) => {
   const rows = Math.ceil(itemsCount / columns);
-  
+
   const SkeletonItem = () => (
     <View className="w-[48%] mb-4">
       {/* Image Skeleton */}
       <View className="w-full h-32 bg-gray-300 rounded-xl mb-3 animate-pulse" />
-      
+
       {/* Content Skeleton */}
       <View className="space-y-2">
         {/* Brand Name */}
         <View className="w-3/5 h-3 bg-gray-300 rounded-full animate-pulse" />
-        
+
         {/* Product Name */}
         <View className="w-4/5 h-4 bg-gray-300 rounded-full animate-pulse" />
-        
+
         {/* Price */}
         <View className="w-2/5 h-4 bg-gray-300 rounded-full animate-pulse" />
-        
+
         {/* Stock */}
         <View className="w-3/5 h-3 bg-gray-300 rounded-full animate-pulse" />
-        
+
         {/* Colors */}
         <View className="flex-row space-x-2 mt-2">
           <View className="w-4 h-4 bg-gray-300 rounded-full animate-pulse" />
@@ -47,8 +54,8 @@ const ProductGridSkeleton = ({ itemsCount = 6, columns = 2, showSearchAndCategor
           <View className="h-20 px-4 mb-4">
             <View className="flex-row space-x-3">
               {Array.from({ length: 5 }).map((_, index) => (
-                <View 
-                  key={index} 
+                <View
+                  key={index}
                   className="w-20 h-10 bg-gray-300 rounded-lg animate-pulse"
                 />
               ))}
