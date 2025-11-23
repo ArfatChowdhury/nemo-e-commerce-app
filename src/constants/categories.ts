@@ -1,8 +1,8 @@
-// data/categories.js
-export const categories = [
+// data/categories.ts
+export const categories: string[] = [
     "Electronics",
     "Fashion",
-    "Home & Kitchen", 
+    "Home & Kitchen",
     "Beauty & Personal Care",
     "Sports & Outdoors",
     "Books & Stationery",
@@ -15,4 +15,4 @@ export const categories = [
     "Pet Supplies",
     "Office Supplies",
     "Arts & Crafts"
-  ];
+];

@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import "./global.css"
 import AppNavigator from './src/navigation/AppNavigator'
 import { Provider } from 'react-redux';
-import {store} from './src/Store/store'
+import { store } from './src/Store/store'
 
 export default function App() {
   return (

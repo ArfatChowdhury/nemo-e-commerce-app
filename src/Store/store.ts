@@ -10,3 +10,7 @@ export const store = configureStore({
         // auth: authReducer // TEMPORARILY DISABLED
     }
 })
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

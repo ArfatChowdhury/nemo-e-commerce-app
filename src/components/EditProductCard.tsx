@@ -1,24 +1,43 @@
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
-// import PropTypes from 'prop-types';
 import { API_BASE_URL } from '../constants/apiConfig'
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../Store/hooks';
 import { fetchProducts } from '../Store/slices/productFormSlice';
 
 
-const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
+interface EditProductCardProps {
+  item: any,
+  onPress: (item: any) => void,
+  onEdit: (item: any) => void,
+  onDelete: (id: string) => void
+}
+
+interface Product {
+  _id: string;
+  productName: string;
+  price: number | string;
+  brandName: string;
+  stock: number;
+  images?: string[];
+  colors?: Array<{
+    name: string;
+    value: string;
+  }>;
+}
+
+
+const EditProductCard = ({ item, onPress, onEdit, onDelete }: EditProductCardProps) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const navigation = useNavigation()
-  const dispatch = useDispatch()
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const dispatch = useAppDispatch()
   const Base_URL = API_BASE_URL
-  console.log('🖼️ Product Image URL:', item.images?.[0]);
 
-  const handleImageError = (e) => {
-    console.log('❌ Image failed to load:', e.nativeEvent.error);
-    console.log('🖼️ Failed URL:', item.images?.[0]);
+  const handleImageError = (e: any) => {
     setImageError(true);
     setImageLoading(false);
   };
@@ -34,7 +53,7 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
     setImageError(false);
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = (price: number | string) => {
     if (typeof price === 'number') {
       return `$${price.toFixed(2)}`;
     }
@@ -58,7 +77,7 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
     }
   };
 
-  const handleDeletePress = () => {
+  const handleDeletePress = (): void => {
     Alert.alert(
       "Delete Product",
       `Are you sure you want to delete "${item.productName}"?`,
@@ -91,12 +110,12 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
                   onDelete(item._id);
                 }
 
-                // Show success message
+
                 Alert.alert('Success', 'Product deleted successfully');
                 dispatch(fetchProducts())
 
               } else {
-                // Get the actual error message from backend
+
                 const errorText = await response.text();
                 console.error('❌ Failed to delete product:', response.status, errorText);
 
@@ -112,7 +131,7 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
               }
             } catch (error) {
               console.error('❌ Network error deleting product:', error);
-              Alert.alert('Error', `Network error: ${error.message}`);
+              Alert.alert('Error', `Network error: ${(error as any).message}`);
             }
           }
         }
@@ -222,7 +241,7 @@ const EditProductCard = ({ item, onPress, onEdit, onDelete }) => {
             accessibilityRole="text"
             accessibilityLabel={`Available in ${item.colors.length} colors`}
           >
-            {item.colors.slice(0, 3).map((color, index) => (
+            {item.colors.slice(0, 3).map((color: any, index: number) => (
               <View
                 key={`${color.value}-${index}`}
                 className="w-3 h-3 rounded-full mr-1 border border-gray-200"

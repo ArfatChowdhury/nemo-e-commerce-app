@@ -1,13 +1,16 @@
+import React from 'react';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from '../screens/HomeScreen'
-import ProfileScreen from '../screens/ProfileScreen'
-import AddProductScreen from '../screens/AddProductScreen';
 import { Ionicons } from "@expo/vector-icons";
+import { Platform } from "react-native";
+import { useSelector } from "react-redux";
+
+import HomeScreen from '../screens/HomeScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import AddProductScreen from '../screens/AddProductScreen';
 import CartScreen from "../screens/CartScreen";
 import Category from "../screens/Category";
-import { Platform } from "react-native";
 import ColorSelection from "../screens/ColorSelection";
 import ProductDetails from "../screens/ProductDetails";
 import ProductManagement from "../screens/ProductManagement";
@@ -15,20 +18,23 @@ import EditProductScreen from "../screens/EditProductScreen";
 import EditFormScreen from "../screens/EditFormScreen";
 import CheckoutScreen from "../screens/CheckoutScreen";
 import PaymentScreen from "../screens/PaymentScreen";
-import { useSelector } from "react-redux";
 import WishlistScreen from "../screens/WishlistScreen";
 import OrderHistoryScreen from "../screens/OrderHistoryScreen";
-// import LoginScreen from "../screens/LoginScreen"; // DISABLED - Firebase incompatible with Expo Go
-// import SignupScreen from "../screens/SignupScreen"; // DISABLED - Firebase incompatible with Expo Go
+import { RootStackParamList } from './types';
 
 
-const Tab = createBottomTabNavigator()
-const Stack = createStackNavigator()
+type TabParamList = {
+    Home: undefined;
+    Cart: undefined;
+    Profile: undefined;
+};
 
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function MyTabs() {
-    const cartItems = useSelector(state => state.productForm.cartItems)
-    const cartItemCount = cartItems.length
+    const cartItems = useSelector((state: any) => state.productForm.cartItems);
+    const cartItemCount = cartItems.length;
     return (
         <Tab.Navigator screenOptions={{
             headerShown: false,
@@ -53,11 +59,9 @@ function MyTabs() {
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarIcon: ({ color, size, focused }) => (
                     <Ionicons name="person" size={size} color={color} />
-
                 )
             }} />
         </Tab.Navigator>
-
     )
 }
 
@@ -100,11 +104,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Payment" component={PaymentScreen} />
                 <Stack.Screen name="Wishlist" component={WishlistScreen} />
                 <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
-                {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
-                {/* <Stack.Screen name="Signup" component={SignupScreen} /> */}
-
             </Stack.Navigator>
         </NavigationContainer>
     )
 }
-
