@@ -64,15 +64,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <ProfileButton iconName='receipt-outline' name='Order History' onPress={() => navigation.navigate('OrderHistory')} />
           </View>
 
-          {/* Auth Note */}
-          <View className="mx-6 mt-8 p-4 bg-orange-50 rounded-xl border border-orange-200">
-            <View className="flex-row items-start">
-              <Ionicons name="information-circle" size={20} color="#F97316" />
-              <Text className="flex-1 ml-2 text-orange-800 text-sm">
-                Login & Signup require a custom development build. They're not available in Expo Go.
-              </Text>
-            </View>
-          </View>
+
+
         </View>
       )}
     </View>
