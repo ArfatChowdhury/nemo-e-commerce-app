@@ -2,16 +2,15 @@
 import { View, Text, Pressable } from 'react-native'
 import React from 'react'
 
-// interface ColorCardProps {
-//     color: string,
-//     onPress: (color: string) => void,
-//     isSelected: boolean
-// }
 
 interface ColorCardProps {
-    color: string,
-    onPress: (color: string) => void,
-    isSelected: boolean
+    color: {
+        name: string,
+        value: string
+    },
+    onPress: (color: { name: string, value: string }) => void,
+    isSelected: boolean,
+
 }
 
 const ColorCard = ({ color, onPress, isSelected }: ColorCardProps) => {
