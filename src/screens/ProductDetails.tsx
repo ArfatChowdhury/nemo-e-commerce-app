@@ -1,29 +1,32 @@
 import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, FlatList, Alert } from 'react-native'
 import React, { useState } from 'react'
-import { useRoute, useNavigation } from '@react-navigation/native'
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderBar from '../components/HeaderBar'
-import { addToCart } from '../Store/slices/productFormSlice'
+import { addToCart, Product, ColorOption } from '../Store/slices/productFormSlice'
+import { useAppDispatch, useAppSelector } from '../Store/hooks'
 import { Ionicons } from '@expo/vector-icons'
 import ProductCard from '../components/ProductCard'
+import { RootStackParamList } from '../navigation/types'
 
 const ProductDetails = () => {
-    const route = useRoute()
-    const navigation = useNavigation()
+    const route = useRoute<RouteProp<RootStackParamList, 'productDetails'>>()
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
     const { productId } = route.params
-    const loading = useSelector(state => state.productForm.loading)
-    const error = useSelector(state => state.productForm.error)
-    const products = useSelector(state => state.productForm.products)
-    const cartItem = useSelector(state => state.productForm.cartItems)
-    const dispatch = useDispatch()
+    const loading = useAppSelector(state => state.productForm.loading)
+    const error = useAppSelector(state => state.productForm.error)
+    const products = useAppSelector(state => state.productForm.products)
+    const cartItem = useAppSelector(state => state.productForm.cartItems)
+    const dispatch = useAppDispatch()
 
     const product = products.find(p => p._id === productId)
     const [showFullDescription, setShowFullDescription] = useState(false)
-    const [selectedColor, setSelectedColor] = useState(null)
+    const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null)
 
     const similarProducts = products.filter(p => p._id !== productId).slice(0, 4)
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = (product: Product) => {
         // Check if product has colors and no color is selected
         if (product.colors && product.colors.length > 0 && !selectedColor) {
             Alert.alert(
@@ -37,7 +40,7 @@ const ProductDetails = () => {
         // Create cart item with selected color
         const cartItem = {
             ...product,
-            selectedColor: selectedColor || null,
+            selectedColor: selectedColor || undefined,
             cartItemId: `${product._id}-${selectedColor ? selectedColor.name : 'no-color'}-${Date.now()}` // Unique ID for cart item
         }
 
@@ -51,18 +54,18 @@ const ProductDetails = () => {
         )
     }
 
-    const handleColorSelect = (color) => {
+    const handleColorSelect = (color: ColorOption) => {
         setSelectedColor(color)
     }
 
-    const handleProductPress = (product) => {
+    const handleProductPress = (product: Product) => {
         navigation.navigate("productDetails", {
             productId: product._id
         })
     }
 
     // Truncate description
-    const truncateDescription = (text, length = 120) => {
+    const truncateDescription = (text: string, length = 120) => {
         if (!text) return '';
         if (text.length <= length) return text;
         return text.substring(0, length) + '...';
@@ -182,8 +185,8 @@ const ProductDetails = () => {
                                         key={index}
                                         onPress={() => handleColorSelect(color)}
                                         className={`flex-row items-center mr-4 mb-3 p-2 rounded-2xl border-2 ${selectedColor?.name === color.name
-                                                ? 'border-orange-500 bg-orange-50'
-                                                : 'border-gray-200 bg-white'
+                                            ? 'border-orange-500 bg-orange-50'
+                                            : 'border-gray-200 bg-white'
                                             } shadow-sm`}
                                     >
                                         <View
@@ -191,8 +194,8 @@ const ProductDetails = () => {
                                             style={{ backgroundColor: color.value }}
                                         />
                                         <Text className={`font-medium ${selectedColor?.name === color.name
-                                                ? 'text-orange-700'
-                                                : 'text-gray-700'
+                                            ? 'text-orange-700'
+                                            : 'text-gray-700'
                                             }`}>
                                             {color.name}
                                         </Text>
@@ -232,8 +235,8 @@ const ProductDetails = () => {
                     <TouchableOpacity
                         onPress={() => handleAddToCart(product)}
                         className={`py-4 rounded-2xl shadow-lg ${(product.colors && product.colors.length > 0 && !selectedColor)
-                                ? 'bg-gray-400 shadow-gray-400/30'
-                                : 'bg-orange-500 shadow-orange-500/30'
+                            ? 'bg-gray-400 shadow-gray-400/30'
+                            : 'bg-orange-500 shadow-orange-500/30'
                             }`}
                         disabled={product.colors && product.colors.length > 0 && !selectedColor}
                     >
@@ -261,7 +264,7 @@ const ProductDetails = () => {
                         <Text className="text-2xl font-bold text-gray-900 mb-4">Similar Products</Text>
                         <FlatList
                             data={similarProducts}
-                            keyExtractor={(item) => item._id || item.id}
+                            keyExtractor={(item: Product) => item._id}
                             renderItem={({ item }) => (
                                 <View className="mr-4" style={{ width: 160 }}>
                                     <ProductCard

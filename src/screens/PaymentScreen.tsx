@@ -2,19 +2,29 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image } fro
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderBar from '../components/HeaderBar'
-import { useNavigation, useRoute } from '@react-navigation/native'
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useDispatch } from 'react-redux'
 import { clearCart } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { setOrderHistory } from '../Store/slices/productFormSlice'
+import { RootStackParamList } from '../navigation/types'
+
+interface CardDetails {
+    cardNumber: string;
+    expiryDate: string;
+    cvv: string;
+    cardHolderName: string;
+}
+
 const PaymentScreen = () => {
-    const navigation = useNavigation()
-    const route = useRoute()
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+    const route = useRoute<RouteProp<RootStackParamList, 'Payment'>>()
     const dispatch = useDispatch()
 
     const { totals, shippingAddress, cartItems } = route.params || {}
 
-    const [cardDetails, setCardDetails] = useState({
+    const [cardDetails, setCardDetails] = useState<CardDetails>({
         cardNumber: '',
         expiryDate: '',
         cvv: '',
