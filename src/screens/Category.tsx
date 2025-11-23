@@ -13,6 +13,8 @@ type RootStackParamList = {
     category: undefined;
 }
 
+
+
 type CategoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'category'>;
 
 const Category = () => {

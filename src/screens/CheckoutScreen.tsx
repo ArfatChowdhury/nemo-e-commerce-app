@@ -4,10 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderBar from '../components/HeaderBar'
 import { useSelector } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useAppSelector } from '../Store/hooks'
+import { RootStackParamList } from '../navigation/types'
+
+type CheckoutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Checkout'>
 
 const CheckoutScreen = () => {
-    const navigation = useNavigation()
-    const cartItems = useSelector(state => state.productForm.cartItems)
+    const navigation = useNavigation<CheckoutScreenNavigationProp>()
+    const cartItems = useAppSelector((state: any) => state.productForm.cartItems)
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -18,7 +23,7 @@ const CheckoutScreen = () => {
     })
 
     const calculateTotal = () => {
-        const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+        const subtotal = cartItems.reduce((total: number, item: any) => total + (item.price * item.quantity), 0)
         const shipping = subtotal > 0 ? 5.99 : 0
         const tax = subtotal * 0.1
         return {
@@ -31,7 +36,7 @@ const CheckoutScreen = () => {
 
     const totals = calculateTotal()
 
-    const handleInputChange = (field, value) => {
+    const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 

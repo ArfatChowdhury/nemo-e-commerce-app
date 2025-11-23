@@ -6,33 +6,38 @@ import HeaderBar from '../components/HeaderBar'
 import { removeFromCart, increaseQuantity, decreaseQuantity, clearCart } from '../Store/slices/productFormSlice'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
+import { useAppSelector } from '../Store/hooks'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../navigation/types'
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
 const CartScreen = () => {
   const dispatch = useDispatch()
-  const navigation = useNavigation()
-  const cartItems = useSelector(state => state.productForm.cartItems)
+  const navigation = useNavigation<NavigationProp>()
+  const cartItems = useAppSelector(state => state.productForm.cartItems)
 
-  // Calculate totals
+
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
   }
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal()
-    const shipping = subtotal > 0 ? 5.99 : 0 // Fixed shipping cost
-    const tax = subtotal * 0.1 // 10% tax
+    const shipping = subtotal > 0 ? 5.99 : 0
+    const tax = subtotal * 0.1
     return subtotal + shipping + tax
   }
 
-  const handleIncreaseQuantity = (cartItemId) => {
+  const handleIncreaseQuantity = (cartItemId: string) => {
     dispatch(increaseQuantity(cartItemId))
   }
 
-  const handleDecreaseQuantity = (cartItemId) => {
+  const handleDecreaseQuantity = (cartItemId: string) => {
     dispatch(decreaseQuantity(cartItemId))
   }
 
-  const handleRemoveItem = (cartItemId, productName) => {
+  const handleRemoveItem = (cartItemId: string, productName: string) => {
     Alert.alert(
       "Remove Item",
       `Remove ${productName} from cart?`,
@@ -78,7 +83,7 @@ const CartScreen = () => {
   if (cartItems.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50">
-        <HeaderBar title="Shopping Cart" />
+        <HeaderBar iconName='arrow-back' title="Shopping Cart" />
         <View className="flex-1 justify-center items-center px-8">
           <Ionicons name="cart-outline" size={80} color="#9CA3AF" />
           <Text className="text-2xl font-bold text-gray-500 mt-6 text-center">
@@ -94,7 +99,7 @@ const CartScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <HeaderBar title="Shopping Cart" />
+      <HeaderBar iconName='arrow-back' title="Shopping Cart" />
 
       {/* Cart Header with Checkout Button */}
       <View className="flex-row justify-between items-center px-6 py-4 bg-white border-b border-gray-200">

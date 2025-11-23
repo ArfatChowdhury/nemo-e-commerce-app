@@ -8,7 +8,7 @@ export type RootStackParamList = {
     EditProduct: undefined;
     EditForm: { productId: string };
     Checkout: undefined;
-    Payment: undefined;
+    Payment: { shippingAddress: any; totals: any; cartItems: any };
     Wishlist: undefined;
     OrderHistory: undefined;
 
