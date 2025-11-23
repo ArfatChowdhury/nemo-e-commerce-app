@@ -11,17 +11,17 @@ interface InputBlockProps extends Omit<TextInputProps, 'onChange' | 'onChangeTex
   error?: string;
 }
 
-const InputBlock: React.FC<InputBlockProps> = ({ 
-  label, 
-  placeholder, 
-  value, 
-  onChange, 
-  multiline, 
-  height, 
+const InputBlock: React.FC<InputBlockProps> = ({
+  label,
+  placeholder,
+  value,
+  onChange,
+  multiline,
+  height,
   error,
-  ...rest 
+  ...rest
 }) => (
-    <View className="mb-5">
+  <View className="mb-5">
     <Text className="text-lg font-semibold mb-2 text-gray-800">{label}</Text>
     <TextInput
       placeholder={placeholder}

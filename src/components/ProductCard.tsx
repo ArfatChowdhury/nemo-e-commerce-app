@@ -1,23 +1,31 @@
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useDispatch, useSelector } from 'react-redux';
 import { setWishlists } from '../Store/slices/productFormSlice';
+import { useAppDispatch, useAppSelector } from '../Store/hooks';
+import { RootStackParamList } from '../navigation/types';
 
-const ProductCard = ({ item, onPress }) => {
+type ProductCardNavigationProp = StackNavigationProp<RootStackParamList>;
+
+interface ProductCardProps {
+  item: any;
+  onPress: (productId: string) => void;
+}
+
+const ProductCard = ({ item, onPress }: ProductCardProps) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const navigation = useNavigation()
-  const wishlist = useSelector((state) => state.productForm.wishlists);
+  const navigation = useNavigation<ProductCardNavigationProp>();
+  const wishlist = useAppSelector((state) => state.productForm.wishlists);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  console.log('🖼️ Product Image URL:', item.images?.[0]);
 
-  const handleImageError = (e) => {
-    console.log('❌ Image failed to load:', e.nativeEvent.error);
-    console.log('🖼️ Failed URL:', item.images?.[0]);
+  const handleImageError = (e: any) => {
+
+
     setImageError(true);
     setImageLoading(false);
   };
@@ -33,7 +41,7 @@ const ProductCard = ({ item, onPress }) => {
     setImageError(false);
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = (price: number | string) => {
     if (typeof price === 'number') {
       return `$${price.toFixed(2)}`;
     }
@@ -50,20 +58,20 @@ const ProductCard = ({ item, onPress }) => {
     });
   }, [navigation, item._id]);
 
-  const handleAddToWishlist = (item) => {
+  const handleAddToWishlist = (item: any) => {
     console.log('Added to wishlist:', item);
     dispatch(setWishlists(item));
   };
 
-  const checkItemExistsInWishlist = (productId) => {
-    return wishlist.find((item) => item._id === productId);
+  const checkItemExistsInWishlist = (productId: string) => {
+    return wishlist.find((item: any) => item._id === productId);
   };
 
 
   return (
     <TouchableOpacity
       className="bg-white rounded-xl m-2 shadow-sm shadow-black/20 elevation-3 w-48"
-      onPress={() => handleProductPress(item._id)}
+      onPress={handleProductPress}
       accessible={true}
       accessibilityLabel={getAccessibilityLabel()}
       accessibilityRole="button"
@@ -148,7 +156,7 @@ const ProductCard = ({ item, onPress }) => {
             accessibilityRole="text"
             accessibilityLabel={`Available in ${item.colors.length} colors`}
           >
-            {item.colors.slice(0, 3).map((color, index) => (
+            {item.colors.slice(0, 3).map((color: any, index: number) => (
               <View
                 key={`${color.value}-${index}`}
                 className="w-3 h-3 rounded-full mr-1 border border-gray-200"
