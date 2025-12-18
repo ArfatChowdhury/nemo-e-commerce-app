@@ -1,4 +1,4 @@
-// data/categories.ts
+
 export const categories: string[] = [
     "Electronics",
     "Fashion",

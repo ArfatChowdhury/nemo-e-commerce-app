@@ -1,181 +1,147 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderBar from '../components/HeaderBar'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useDispatch } from 'react-redux'
-import { clearCart } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
-import { setOrderHistory } from '../Store/slices/productFormSlice'
 import { RootStackParamList } from '../navigation/types'
 
-interface CardDetails {
-    cardNumber: string;
-    expiryDate: string;
-    cvv: string;
-    cardHolderName: string;
-}
+type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>
+type PaymentScreenRouteProp = RouteProp<RootStackParamList, 'Payment'>
 
 const PaymentScreen = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
-    const route = useRoute<RouteProp<RootStackParamList, 'Payment'>>()
-    const dispatch = useDispatch()
+    const navigation = useNavigation<PaymentScreenNavigationProp>()
+    const route = useRoute<PaymentScreenRouteProp>()
+    const { shippingAddress, totals, cartItems } = route.params
 
-    const { totals, shippingAddress, cartItems } = route.params || {}
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card')
 
-    const [cardDetails, setCardDetails] = useState<CardDetails>({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardHolderName: ''
-    })
+    const paymentMethods = [
+        { id: 'card', name: 'Credit/Debit Card', icon: 'card-outline' as const },
+        { id: 'paypal', name: 'PayPal', icon: 'wallet-outline' as const },
+        { id: 'apple', name: 'Apple Pay', icon: 'logo-apple' as const },
+        { id: 'cash', name: 'Cash on Delivery', icon: 'cash-outline' as const },
+    ]
 
-    const handlePayment = () => {
-
-        if (!cardDetails.cardNumber || !cardDetails.expiryDate || !cardDetails.cvv || !cardDetails.cardHolderName) {
-            Alert.alert('Error', 'Please fill in all card details')
-            return
-        }
-
-
-        Alert.alert(
-            'Processing Payment',
-            'Please wait...',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel'
-                },
-                {
-                    text: 'OK',
-                    onPress: () => {
-
-                        setTimeout(() => {
-                            Alert.alert(
-                                'Payment Successful',
-                                'Your order has been placed successfully!',
-                                [
-                                    {
-                                        text: 'OK',
-                                        onPress: () => {
-                                            dispatch(clearCart())
-                                            dispatch(setOrderHistory({
-                                                cartItems
-                                            }))
-                                            navigation.reset({
-                                                index: 0,
-                                                routes: [{ name: 'bottomTabs' }],
-                                            })
-                                        }
-                                    }
-                                ]
-                            )
-                        }, 1000)
-                    }
-                }
-            ]
-        )
+    const handlePlaceOrder = () => {
+        // TODO: Implement order placement logic
+        alert('Order placed successfully!')
+        // Navigate to order history or home
+        navigation.navigate('bottomTabs')
     }
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
-            <HeaderBar title="Payment" iconName="arrow-back" />
+            <HeaderBar iconName='arrow-back' title="Payment" />
 
-            <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+            <ScrollView
+                className="flex-1 px-4"
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Payment Methods Section */}
+                <View className="mt-4 mb-6">
+                    <Text className="text-lg font-bold text-gray-900 mb-4">Payment Method</Text>
 
-                {/* Order Summary Card */}
-                <View className="bg-orange-500 p-6 rounded-3xl shadow-lg shadow-orange-500/30 mt-4 mb-6">
-                    <Text className="text-orange-100 text-lg mb-1">Total Amount</Text>
-                    <Text className="text-white text-4xl font-bold">
-                        ${totals?.total?.toFixed(2) || '0.00'}
-                    </Text>
-                    <View className="flex-row items-center mt-4 bg-orange-600/30 p-2 rounded-lg self-start">
-                        <Ionicons name="shield-checkmark" size={20} color="#FFEDD5" />
-                        <Text className="text-orange-50 ml-2 text-sm">Secure Payment</Text>
+                    <View className="space-y-3">
+                        {paymentMethods.map((method) => (
+                            <TouchableOpacity
+                                key={method.id}
+                                onPress={() => setSelectedPaymentMethod(method.id)}
+                                className={`bg-white p-4 rounded-xl border-2 flex-row items-center ${
+                                    selectedPaymentMethod === method.id
+                                        ? 'border-orange-500 bg-orange-50'
+                                        : 'border-gray-200'
+                                }`}
+                            >
+                                <Ionicons
+                                    name={method.icon}
+                                    size={24}
+                                    color={selectedPaymentMethod === method.id ? '#f97316' : '#6b7280'}
+                                />
+                                <Text
+                                    className={`flex-1 ml-3 text-base ${
+                                        selectedPaymentMethod === method.id
+                                            ? 'font-bold text-orange-600'
+                                            : 'text-gray-900'
+                                    }`}
+                                >
+                                    {method.name}
+                                </Text>
+                                {selectedPaymentMethod === method.id && (
+                                    <Ionicons name="checkmark-circle" size={24} color="#f97316" />
+                                )}
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 </View>
 
-                {/* Payment Method Selection (Mock) */}
-                <Text className="text-lg font-bold text-gray-900 mb-4">Payment Method</Text>
-                <View className="flex-row space-x-4 mb-6">
-                    <TouchableOpacity className="bg-white p-4 rounded-xl border-2 border-orange-500 flex-1 items-center justify-center shadow-sm">
-                        <Ionicons name="card" size={24} color="#f97316" />
-                        <Text className="text-orange-600 font-bold mt-2">Card</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="bg-white p-4 rounded-xl border border-gray-200 flex-1 items-center justify-center shadow-sm">
-                        <Ionicons name="logo-apple" size={24} color="#374151" />
-                        <Text className="text-gray-600 font-medium mt-2">Apple Pay</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="bg-white p-4 rounded-xl border border-gray-200 flex-1 items-center justify-center shadow-sm">
-                        <Ionicons name="logo-google" size={24} color="#374151" />
-                        <Text className="text-gray-600 font-medium mt-2">Google Pay</Text>
-                    </TouchableOpacity>
+                {/* Shipping Address Section */}
+                <View className="bg-white p-4 rounded-2xl border border-gray-100 mb-6 shadow-sm">
+                    <Text className="text-lg font-bold text-gray-900 mb-3">Shipping Address</Text>
+                    <View className="space-y-1">
+                        <Text className="text-gray-700">{shippingAddress.fullName}</Text>
+                        <Text className="text-gray-700">{shippingAddress.address}</Text>
+                        <Text className="text-gray-700">
+                            {shippingAddress.city}, {shippingAddress.zipCode}
+                        </Text>
+                        <Text className="text-gray-700">{shippingAddress.phone}</Text>
+                    </View>
                 </View>
 
-                {/* Card Details Form */}
-                <View className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
-                    <Text className="text-lg font-bold text-gray-900 mb-4">Card Details</Text>
+                {/* Order Summary Section */}
+                <View className="bg-white p-4 rounded-2xl border border-gray-100 mb-6 shadow-sm">
+                    <Text className="text-lg font-bold text-gray-900 mb-3">Order Summary</Text>
 
-                    <View className="space-y-4">
-                        <View>
-                            <Text className="text-gray-600 mb-1 ml-1">Card Number</Text>
-                            <TextInput
-                                className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-900"
-                                placeholder="0000 0000 0000 0000"
-                                keyboardType="numeric"
-                                value={cardDetails.cardNumber}
-                                onChangeText={(text) => setCardDetails({ ...cardDetails, cardNumber: text })}
-                            />
+                    {/* Cart Items */}
+                    <View className="mb-3">
+                        {cartItems.map((item: any, index: number) => (
+                            <View key={index} className="flex-row justify-between mb-2">
+                                <Text className="text-gray-600 flex-1">
+                                    {item.name} x{item.quantity}
+                                </Text>
+                                <Text className="text-gray-900 font-medium">
+                                    ${(item.price * item.quantity).toFixed(2)}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+
+                    <View className="h-px bg-gray-200 my-2" />
+
+                    <View className="space-y-2">
+                        <View className="flex-row justify-between">
+                            <Text className="text-gray-600">Subtotal</Text>
+                            <Text className="text-gray-900 font-medium">${totals.subtotal.toFixed(2)}</Text>
+                        </View>
+                        <View className="flex-row justify-between">
+                            <Text className="text-gray-600">Shipping</Text>
+                            <Text className="text-gray-900 font-medium">${totals.shipping.toFixed(2)}</Text>
+                        </View>
+                        <View className="flex-row justify-between">
+                            <Text className="text-gray-600">Tax (10%)</Text>
+                            <Text className="text-gray-900 font-medium">${totals.tax.toFixed(2)}</Text>
                         </View>
 
-                        <View className="flex-row space-x-4">
-                            <View className="flex-1">
-                                <Text className="text-gray-600 mb-1 ml-1">Expiry Date</Text>
-                                <TextInput
-                                    className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-900"
-                                    placeholder="MM/YY"
-                                    value={cardDetails.expiryDate}
-                                    onChangeText={(text) => setCardDetails({ ...cardDetails, expiryDate: text })}
-                                />
-                            </View>
-                            <View className="flex-1">
-                                <Text className="text-gray-600 mb-1 ml-1">CVV</Text>
-                                <TextInput
-                                    className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-900"
-                                    placeholder="123"
-                                    keyboardType="numeric"
-                                    maxLength={3}
-                                    secureTextEntry
-                                    value={cardDetails.cvv}
-                                    onChangeText={(text) => setCardDetails({ ...cardDetails, cvv: text })}
-                                />
-                            </View>
-                        </View>
+                        <View className="h-px bg-gray-200 my-2" />
 
-                        <View>
-                            <Text className="text-gray-600 mb-1 ml-1">Card Holder Name</Text>
-                            <TextInput
-                                className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-900"
-                                placeholder="John Doe"
-                                value={cardDetails.cardHolderName}
-                                onChangeText={(text) => setCardDetails({ ...cardDetails, cardHolderName: text })}
-                            />
+                        <View className="flex-row justify-between">
+                            <Text className="text-lg font-bold text-gray-900">Total</Text>
+                            <Text className="text-lg font-bold text-orange-600">${totals.total.toFixed(2)}</Text>
                         </View>
                     </View>
                 </View>
 
             </ScrollView>
 
-            {/* Pay Button */}
+            {/* Bottom Button */}
             <View className="p-4 bg-white border-t border-gray-200">
                 <TouchableOpacity
-                    onPress={handlePayment}
-                    className="bg-orange-600 py-4 rounded-2xl shadow-lg shadow-orange-500/30 flex-row justify-center items-center"
+                    onPress={handlePlaceOrder}
+                    className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
                 >
-                    <Ionicons name="lock-closed" size={20} color="white" className="mr-2" />
-                    <Text className="text-white text-center font-bold text-lg ml-2">
-                        Pay ${totals?.total?.toFixed(2) || '0.00'}
+                    <Text className="text-white text-center font-bold text-lg">
+                        Place Order
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -184,3 +150,4 @@ const PaymentScreen = () => {
 }
 
 export default PaymentScreen
+

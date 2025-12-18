@@ -62,7 +62,7 @@ const AddProductScreen = () => {
       if (json.success) return json.data.url;
       throw new Error(json.error?.message ?? "Upload failed");
     } catch (err) {
-      console.log("ImgBB error:", err);
+      
       throw err;
     }
   };
@@ -95,21 +95,12 @@ const AddProductScreen = () => {
     if (error) return Alert.alert("Error", error);
   
     try {
-      console.log('📤 Starting product creation...');
-      
-      // Upload images first
-      console.log('🖼️ Uploading images to ImgBB...');
       const uploadedUrls = await uploadAllImages(formData.images);
-      console.log('✅ Images uploaded:', uploadedUrls);
-  
-      // Prepare product data
       const productData = {
         ...formData,
         images: uploadedUrls,
         createdAt: new Date().toISOString(),
       };
-  
-      console.log('📦 Sending to server:', productData);
   
       // Make the API request with better error handling
       const response = await fetch(`${BASE_URL}/products`, {
@@ -137,7 +128,7 @@ const AddProductScreen = () => {
         throw new Error(json.message || `HTTP error! status: ${response.status}`);
       }
   
-      console.log('✅ Product created successfully:', json);
+    
   
       // Success
       dispatch(fetchProducts());
@@ -145,7 +136,7 @@ const AddProductScreen = () => {
       Alert.alert("Success", "Product added successfully!");
       
     } catch (err) {
-      console.log('❌ Error adding product:', err);
+     
       Alert.alert(
         "Error", 
         err.message || "Failed to add product. Please check your connection and try again."
