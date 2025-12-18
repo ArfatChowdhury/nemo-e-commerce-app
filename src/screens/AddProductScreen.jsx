@@ -62,7 +62,7 @@ const AddProductScreen = () => {
       if (json.success) return json.data.url;
       throw new Error(json.error?.message ?? "Upload failed");
     } catch (err) {
-      
+
       throw err;
     }
   };
@@ -88,30 +88,36 @@ const AddProductScreen = () => {
     return null;
   };
 
- 
+
 
   const handleAdd = async () => {
     const error = validateForm();
     if (error) return Alert.alert("Error", error);
-  
+
     try {
       const uploadedUrls = await uploadAllImages(formData.images);
       const productData = {
-        ...formData,
+        productName: formData.productName,
+        price: formData.price,
+        description: formData.description,
+        brandName: formData.brandName,
+        stock: formData.stock,
+        colors: formData.colors,
+        category: formData.category,
         images: uploadedUrls,
         createdAt: new Date().toISOString(),
       };
-  
+
       // Make the API request with better error handling
       const response = await fetch(`${BASE_URL}/products`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
         body: JSON.stringify(productData),
       });
-  
+
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
@@ -119,26 +125,26 @@ const AddProductScreen = () => {
         console.log('❌ Server returned non-JSON response:', textResponse.substring(0, 200));
         throw new Error(`Server error: ${response.status} - ${response.statusText}`);
       }
-  
+
       // Parse JSON only if it's actually JSON
       const json = await response.json();
-      
+
       if (!response.ok) {
         console.log('❌ Server error response:', json);
         throw new Error(json.message || `HTTP error! status: ${response.status}`);
       }
-  
-    
-  
+
+
+
       // Success
       dispatch(fetchProducts());
       dispatch(resetForm());
       Alert.alert("Success", "Product added successfully!");
-      
+
     } catch (err) {
-     
+
       Alert.alert(
-        "Error", 
+        "Error",
         err.message || "Failed to add product. Please check your connection and try again."
       );
     }

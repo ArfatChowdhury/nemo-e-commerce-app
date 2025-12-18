@@ -1,33 +1,30 @@
 import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, FlatList, Alert } from 'react-native'
 import React, { useState } from 'react'
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useRoute, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import HeaderBar from '../components/HeaderBar'
-import { addToCart, Product, ColorOption } from '../Store/slices/productFormSlice'
-import { useAppDispatch, useAppSelector } from '../Store/hooks'
+import { addToCart } from '../Store/slices/productFormSlice'
 import { Ionicons } from '@expo/vector-icons'
 import ProductCard from '../components/ProductCard'
-import { RootStackParamList } from '../navigation/types'
 
 const ProductDetails = () => {
-    const route = useRoute<RouteProp<RootStackParamList, 'productDetails'>>()
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+    const route = useRoute()
+    const navigation = useNavigation()
     const { productId } = route.params
-    const loading = useAppSelector(state => state.productForm.loading)
-    const error = useAppSelector(state => state.productForm.error)
-    const products = useAppSelector(state => state.productForm.products)
-    const cartItem = useAppSelector(state => state.productForm.cartItems)
-    const dispatch = useAppDispatch()
+    const loading = useSelector(state => state.productForm.loading)
+    const error = useSelector(state => state.productForm.error)
+    const products = useSelector(state => state.productForm.products)
+    const cartItem = useSelector(state => state.productForm.cartItems)
+    const dispatch = useDispatch()
 
     const product = products.find(p => p._id === productId)
     const [showFullDescription, setShowFullDescription] = useState(false)
-    const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null)
+    const [selectedColor, setSelectedColor] = useState(null)
 
     const similarProducts = products.filter(p => p._id !== productId).slice(0, 4)
 
-    const handleAddToCart = (product: Product) => {
-        // Check if product has colors and no color is selected
+    const handleAddToCart = (product) => {
+  
         if (product.colors && product.colors.length > 0 && !selectedColor) {
             Alert.alert(
                 "Select Color",
@@ -37,16 +34,16 @@ const ProductDetails = () => {
             return
         }
 
-        // Create cart item with selected color
+        
         const cartItem = {
             ...product,
-            selectedColor: selectedColor || undefined,
+            selectedColor: selectedColor || null,
             cartItemId: `${product._id}-${selectedColor ? selectedColor.name : 'no-color'}-${Date.now()}` // Unique ID for cart item
         }
 
         dispatch(addToCart(cartItem))
-
-        // Show success feedback
+        
+        
         Alert.alert(
             "Added to Cart",
             `${product.productName}${selectedColor ? ` (${selectedColor.name})` : ''} has been added to your cart`,
@@ -54,18 +51,18 @@ const ProductDetails = () => {
         )
     }
 
-    const handleColorSelect = (color: ColorOption) => {
+    const handleColorSelect = (color) => {
         setSelectedColor(color)
     }
 
-    const handleProductPress = (product: Product) => {
+    const handleProductPress = (product) => {
         navigation.navigate("productDetails", {
             productId: product._id
         })
     }
 
     // Truncate description
-    const truncateDescription = (text: string, length = 120) => {
+    const truncateDescription = (text, length = 120) => {
         if (!text) return '';
         if (text.length <= length) return text;
         return text.substring(0, length) + '...';
@@ -74,7 +71,7 @@ const ProductDetails = () => {
     if (loading) {
         return (
             <View className="flex-1 justify-center items-center bg-white">
-                <ActivityIndicator size="large" color="#f97316" />
+                <ActivityIndicator size="large" color="#3B82F6" />
                 <Text className="text-gray-500 mt-4">Loading product...</Text>
             </View>
         )
@@ -102,8 +99,8 @@ const ProductDetails = () => {
     return (
         <View className="flex-1 bg-gray-50">
             <HeaderBar title="Product Details" iconName='arrow-back' />
-
-            <ScrollView
+            
+            <ScrollView 
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 30 }}
             >
@@ -125,7 +122,7 @@ const ProductDetails = () => {
                         <Text className="text-2xl font-bold text-gray-900 flex-1 mr-4">
                             {product.productName}
                         </Text>
-                        <Text className="text-2xl font-bold text-orange-600">
+                        <Text className="text-2xl font-bold text-blue-600">
                             ${product.price}
                         </Text>
                     </View>
@@ -135,10 +132,12 @@ const ProductDetails = () => {
                         <Text className="text-base text-gray-600">
                             by {product.brandName}
                         </Text>
-                        <View className={`px-3 py-1 rounded-full ${product.stock > 10 ? 'bg-green-100' : 'bg-red-100'
+                        <View className={`px-3 py-1 rounded-full ${
+                            product.stock > 10 ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                            <Text className={`text-sm font-medium ${
+                                product.stock > 10 ? 'text-green-800' : 'text-red-800'
                             }`}>
-                            <Text className={`text-sm font-medium ${product.stock > 10 ? 'text-green-800' : 'text-red-800'
-                                }`}>
                                 {product.stock > 10 ? 'In Stock' : `Only ${product.stock} left`}
                             </Text>
                         </View>
@@ -151,11 +150,11 @@ const ProductDetails = () => {
                             {showFullDescription ? product.description : truncateDescription(product.description)}
                         </Text>
                         {product.description && product.description.length > 120 && (
-                            <TouchableOpacity
+                            <TouchableOpacity 
                                 onPress={() => setShowFullDescription(!showFullDescription)}
                                 className="mt-2"
                             >
-                                <Text className="text-orange-500 font-medium">
+                                <Text className="text-blue-500 font-medium">
                                     {showFullDescription ? 'See Less' : 'See More'}
                                 </Text>
                             </TouchableOpacity>
@@ -168,35 +167,37 @@ const ProductDetails = () => {
                             <Text className="text-lg font-semibold text-gray-900 mb-3">
                                 Select Color
                                 {selectedColor && (
-                                    <Text className="text-orange-500 font-normal"> • {selectedColor.name}</Text>
+                                    <Text className="text-blue-500 font-normal"> • {selectedColor.name}</Text>
                                 )}
                             </Text>
-
+                            
                             {/* Color Selection Required Message */}
                             {!selectedColor && (
                                 <Text className="text-red-500 text-sm mb-3">
                                     * Please select a color
                                 </Text>
                             )}
-
+                            
                             <View className="flex-row flex-wrap">
                                 {product.colors.map((color, index) => (
                                     <TouchableOpacity
                                         key={index}
                                         onPress={() => handleColorSelect(color)}
-                                        className={`flex-row items-center mr-4 mb-3 p-2 rounded-2xl border-2 ${selectedColor?.name === color.name
-                                            ? 'border-orange-500 bg-orange-50'
-                                            : 'border-gray-200 bg-white'
-                                            } shadow-sm`}
+                                        className={`flex-row items-center mr-4 mb-3 p-2 rounded-2xl border-2 ${
+                                            selectedColor?.name === color.name 
+                                                ? 'border-blue-500 bg-blue-50' 
+                                                : 'border-gray-200 bg-white'
+                                        } shadow-sm`}
                                     >
-                                        <View
+                                        <View 
                                             className="w-8 h-8 rounded-full mr-3 border-2 border-gray-300 shadow-sm"
                                             style={{ backgroundColor: color.value }}
                                         />
-                                        <Text className={`font-medium ${selectedColor?.name === color.name
-                                            ? 'text-orange-700'
-                                            : 'text-gray-700'
-                                            }`}>
+                                        <Text className={`font-medium ${
+                                            selectedColor?.name === color.name 
+                                                ? 'text-blue-700' 
+                                                : 'text-gray-700'
+                                        }`}>
                                             {color.name}
                                         </Text>
                                     </TouchableOpacity>
@@ -212,7 +213,7 @@ const ProductDetails = () => {
                             <View className="flex-row flex-wrap">
                                 {product.colors.map((color, index) => (
                                     <View key={index} className="flex-row items-center mr-4 mb-3">
-                                        <View
+                                        <View 
                                             className="w-6 h-6 rounded-full mr-2 border border-gray-300"
                                             style={{ backgroundColor: color.value }}
                                         />
@@ -232,12 +233,13 @@ const ProductDetails = () => {
                     </View>
 
                     {/* Add to Cart Button */}
-                    <TouchableOpacity
+                    <TouchableOpacity 
                         onPress={() => handleAddToCart(product)}
-                        className={`py-4 rounded-2xl shadow-lg ${(product.colors && product.colors.length > 0 && !selectedColor)
-                            ? 'bg-gray-400 shadow-gray-400/30'
-                            : 'bg-orange-500 shadow-orange-500/30'
-                            }`}
+                        className={`py-4 rounded-2xl shadow-lg ${
+                            (product.colors && product.colors.length > 0 && !selectedColor)
+                                ? 'bg-gray-400 shadow-gray-400/30'
+                                : 'bg-blue-500 shadow-blue-500/30'
+                        }`}
                         disabled={product.colors && product.colors.length > 0 && !selectedColor}
                     >
                         <Text className="text-white text-center font-bold text-lg">
@@ -250,8 +252,8 @@ const ProductDetails = () => {
 
                     {/* Selected Color Preview */}
                     {selectedColor && (
-                        <View className="mt-4 p-3 bg-orange-50 rounded-2xl border border-orange-200">
-                            <Text className="text-orange-800 text-center font-medium">
+                        <View className="mt-4 p-3 bg-blue-50 rounded-2xl border border-blue-200">
+                            <Text className="text-blue-800 text-center font-medium">
                                 Selected: <Text className="font-bold">{selectedColor.name}</Text>
                             </Text>
                         </View>
@@ -264,10 +266,10 @@ const ProductDetails = () => {
                         <Text className="text-2xl font-bold text-gray-900 mb-4">Similar Products</Text>
                         <FlatList
                             data={similarProducts}
-                            keyExtractor={(item: Product) => item._id}
+                            keyExtractor={(item) => item._id || item.id}
                             renderItem={({ item }) => (
                                 <View className="mr-4" style={{ width: 160 }}>
-                                    <ProductCard
+                                    <ProductCard 
                                         item={item}
                                         onPress={handleProductPress}
                                     />
