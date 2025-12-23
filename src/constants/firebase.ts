@@ -5,6 +5,7 @@ import {
     browserLocalPersistence,
     // @ts-ignore - getReactNativePersistence is not properly exported in types
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Dynamically get React Native persistence to avoid TypeScript errors
 let getReactNativePersistence: any;
@@ -27,6 +28,7 @@ export const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 
 export const auth = (() => {
     try {

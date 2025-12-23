@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>()
-  const { user, logOut } = useAuth()
+  const { user, logOut, role } = useAuth()
 
   const handleLogout = async () => {
     try {
@@ -23,9 +23,7 @@ const ProfileScreen = () => {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-8">
           <Text className="text-2xl font-bold text-gray-900">Profile</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
-            <Ionicons name="settings-outline" size={24} color="#374151" />
-          </TouchableOpacity>
+          {/* Gear button removed as requested */}
         </View>
 
         {/* User Info */}
@@ -39,6 +37,11 @@ const ProfileScreen = () => {
             {user?.displayName || 'User'}
           </Text>
           <Text className="text-gray-500">{user?.email}</Text>
+          {role === 'admin' && (
+            <View className="bg-teal-100 px-3 py-1 rounded-full mt-2">
+              <Text className="text-teal-800 text-xs font-bold uppercase">Admin</Text>
+            </View>
+          )}
         </View>
 
         {/* Menu Items */}
@@ -76,6 +79,23 @@ const ProfileScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
+
+        {/* Admin Section */}
+        {role === 'admin' && (
+          <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
+            <Text className="text-gray-500 text-xs font-bold uppercase mb-2 ml-1">Admin Controls</Text>
+            <TouchableOpacity
+              className="flex-row items-center py-4"
+              onPress={() => navigation.navigate('ProductManagement')}
+            >
+              <View className="w-10 h-10 bg-purple-50 rounded-full items-center justify-center mr-4">
+                <Ionicons name="cube-outline" size={20} color="#7C3AED" />
+              </View>
+              <Text className="flex-1 text-gray-700 font-medium">Product Management</Text>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Logout Button */}
         <TouchableOpacity

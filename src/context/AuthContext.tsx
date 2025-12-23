@@ -7,11 +7,13 @@ import {
     User,
     updateProfile
 } from 'firebase/auth';
-import { auth } from '../constants/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../constants/firebase';
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
+    role: string | null;
     signUp: (email: string, password: string, name: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
     logOut: () => Promise<void>;
@@ -26,6 +28,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [role, setRole] = useState<string | null>(null);
 
     // Sign up with email and password
     const signUp = async (email: string, password: string, name: string) => {
@@ -33,6 +36,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Update profile with display name
         if (userCredential.user) {
             await updateProfile(userCredential.user, { displayName: name });
+
+            // Create user document in Firestore with default role 'user'
+            try {
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    email: email,
+                    displayName: name,
+                    role: 'user',
+                    createdAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error("Error creating user document:", error);
+            }
         }
     };
 
@@ -44,12 +59,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Log out
     const logOut = async () => {
         await signOut(auth);
+        setRole(null);
     };
 
     // Listen for auth state changes
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
+
+            if (currentUser) {
+                // Fetch user role from Firestore
+                try {
+                    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        setRole(userData.role || 'user');
+                    } else {
+                        setRole('user');
+                    }
+                } catch (error) {
+                    console.error("Error fetching user role:", error);
+                    setRole('user');
+                }
+            } else {
+                setRole(null);
+            }
+
             setLoading(false);
         });
 
@@ -59,6 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const value: AuthContextType = {
         user,
         loading,
+        role,
         signUp,
         signIn,
         logOut
