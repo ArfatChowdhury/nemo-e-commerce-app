@@ -116,6 +116,19 @@ const LoginScreen = () => {
                             <Text className="text-teal-600 font-bold">Sign Up</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* Admin Hint */}
+                    <View className="mt-8 p-4 bg-gray-100 rounded-lg">
+                        <Text className="text-gray-500 text-center text-xs">
+                            For admin login use:
+                        </Text>
+                        <Text className="text-gray-700 text-center text-xs font-medium mt-1">
+                            Email: arfat@gmail.com
+                        </Text>
+                        <Text className="text-gray-700 text-center text-xs font-medium">
+                            Password: 123456
+                        </Text>
+                    </View>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>

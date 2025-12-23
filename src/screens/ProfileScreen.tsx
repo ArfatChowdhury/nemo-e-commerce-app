@@ -23,20 +23,19 @@ const ProfileScreen = () => {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-8">
           <Text className="text-2xl font-bold text-gray-900">Profile</Text>
-          {/* Gear button removed as requested */}
         </View>
 
         {/* User Info */}
         <View className="items-center mb-8">
           <View className="w-24 h-24 bg-teal-600 rounded-full items-center justify-center mb-4 shadow-sm">
             <Text className="text-white text-3xl font-bold">
-              {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+              {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'G'}
             </Text>
           </View>
           <Text className="text-xl font-bold text-gray-900">
-            {user?.displayName || 'User'}
+            {user?.displayName || 'Guest User'}
           </Text>
-          <Text className="text-gray-500">{user?.email}</Text>
+          <Text className="text-gray-500">{user?.email || 'Sign in to access all features'}</Text>
           {role === 'admin' && (
             <View className="bg-teal-100 px-3 py-1 rounded-full mt-2">
               <Text className="text-teal-800 text-xs font-bold uppercase">Admin</Text>
@@ -44,18 +43,39 @@ const ProfileScreen = () => {
           )}
         </View>
 
+        {/* Guest Actions: Sign In / Sign Up */}
+        {!user && (
+          <View className="flex-row justify-center space-x-4 mb-8">
+            <TouchableOpacity
+              className="bg-teal-600 px-6 py-3 mx-4 rounded-xl shadow-sm"
+              onPress={() => navigation.navigate('Login')}
+            >
+              <Text className="text-white font-bold">Sign In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-white border border-teal-600 px-6 py-3 rounded-xl shadow-sm"
+              onPress={() => navigation.navigate('Signup')}
+            >
+              <Text className="text-teal-600 font-bold">Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Menu Items */}
         <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-          <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-gray-100"
-            onPress={() => navigation.navigate('EditProfile')}
-          >
-            <View className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center mr-4">
-              <Ionicons name="person-outline" size={20} color="#0d9488" />
-            </View>
-            <Text className="flex-1 text-gray-700 font-medium">Edit Profile</Text>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+          {/* Only show Edit Profile if user is logged in */}
+          {user && (
+            <TouchableOpacity
+              className="flex-row items-center py-4 border-b border-gray-100"
+              onPress={() => navigation.navigate('EditProfile')}
+            >
+              <View className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center mr-4">
+                <Ionicons name="person-outline" size={20} color="#0d9488" />
+              </View>
+              <Text className="flex-1 text-gray-700 font-medium">Edit Profile</Text>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             className="flex-row items-center py-4 border-b border-gray-100"
@@ -97,16 +117,18 @@ const ProfileScreen = () => {
           </View>
         )}
 
-        {/* Logout Button */}
-        <TouchableOpacity
-          className="flex-row items-center bg-white p-4 rounded-2xl shadow-sm mb-8"
-          onPress={handleLogout}
-        >
-          <View className="w-10 h-10 bg-red-50 rounded-full items-center justify-center mr-4">
-            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-          </View>
-          <Text className="flex-1 text-red-500 font-medium">Log Out</Text>
-        </TouchableOpacity>
+        {/* Logout Button (Only if logged in) */}
+        {user && (
+          <TouchableOpacity
+            className="flex-row items-center bg-white p-4 rounded-2xl shadow-sm mb-8"
+            onPress={handleLogout}
+          >
+            <View className="w-10 h-10 bg-red-50 rounded-full items-center justify-center mr-4">
+              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            </View>
+            <Text className="flex-1 text-red-500 font-medium">Log Out</Text>
+          </TouchableOpacity>
+        )}
 
       </ScrollView>
     </SafeAreaView>
