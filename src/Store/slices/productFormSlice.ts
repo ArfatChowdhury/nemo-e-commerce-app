@@ -164,7 +164,14 @@ const productFormSlice = createSlice({
             state.cartItems = [];
         },
         setWishlists: (state, action: PayloadAction<any>) => {
-            state.wishlists.push(action.payload);
+            // Check if item already exists
+            const exists = state.wishlists.some(item => item._id === action.payload._id);
+            if (!exists) {
+                state.wishlists.push(action.payload);
+            }
+        },
+        removeFromWishlist: (state, action: PayloadAction<string>) => {
+            state.wishlists = state.wishlists.filter(item => item._id !== action.payload);
         },
         setOrderHistory: (state, action: PayloadAction<any>) => {
             state.orderHistory.push(action.payload);
@@ -209,6 +216,7 @@ export const {
     decreaseQuantity,
     clearCart,
     setWishlists,
+    removeFromWishlist,
     setOrderHistory
 } = productFormSlice.actions;
 

@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { setWishlists, Product } from '../Store/slices/productFormSlice';
+import { setWishlists, removeFromWishlist, Product } from '../Store/slices/productFormSlice';
 import { useAppDispatch, useAppSelector } from '../Store/hooks';
 import { RootStackParamList } from '../navigation/types';
 
@@ -64,6 +64,17 @@ const ProductCard = ({ item, onPress }: ProductCardProps) => {
   const handleAddToWishlist = (item: any) => {
     console.log('Added to wishlist:', item);
     dispatch(setWishlists(item));
+  };
+
+  const handleToggleWishlist = () => {
+    const isInWishlist = wishlist.some((wishItem: any) => wishItem._id === item._id);
+    if (isInWishlist) {
+      console.log('Removed from wishlist:', item.productName);
+      dispatch(removeFromWishlist(item._id));
+    } else {
+      console.log('Added to wishlist:', item.productName);
+      dispatch(setWishlists(item));
+    }
   };
 
   const checkItemExistsInWishlist = (productId: string) => {
@@ -179,12 +190,12 @@ const ProductCard = ({ item, onPress }: ProductCardProps) => {
           </View>
         )}
         <TouchableOpacity
-          onPress={() => handleAddToWishlist(item)}
-          className="absolute top-2 right-2"
+          onPress={handleToggleWishlist}
+          className="absolute top-2 right-2 bg-white/80 rounded-full p-1.5"
           accessibilityRole="button"
-          accessibilityLabel="Add to wishlist"
+          accessibilityLabel={checkItemExistsInWishlist(item._id) ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Ionicons name={checkItemExistsInWishlist(item._id) ? "heart" : "heart-outline"} size={24} color="red" />
+          <Ionicons name={checkItemExistsInWishlist(item._id) ? "heart" : "heart-outline"} size={22} color="#ef4444" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
