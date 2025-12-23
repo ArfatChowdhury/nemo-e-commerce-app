@@ -11,5 +11,7 @@ export type RootStackParamList = {
     Payment: { shippingAddress: any; totals: any; cartItems: any };
     Wishlist: undefined;
     OrderHistory: undefined;
+    Login: undefined;
+    Signup: undefined;
 
 };

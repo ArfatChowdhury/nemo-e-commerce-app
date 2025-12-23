@@ -21,6 +21,8 @@ import PaymentScreen from "../screens/PaymentScreen";
 import WishlistScreen from "../screens/WishlistScreen";
 import OrderHistoryScreen from "../screens/OrderHistoryScreen";
 import { RootStackParamList } from './types';
+import SignupScreen from '../screens/SignupScreen';
+import LoginScreen from '../screens/LoginScreen';
 
 
 type TabParamList = {
@@ -104,6 +106,8 @@ export default function AppNavigator() {
                 <Stack.Screen name="Payment" component={PaymentScreen} />
                 <Stack.Screen name="Wishlist" component={WishlistScreen} />
                 <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Signup" component={SignupScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     )
