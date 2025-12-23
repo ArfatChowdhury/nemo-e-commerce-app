@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ScrollView, RefreshControl, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ScrollView, RefreshControl, FlatList, TouchableOpacity, Image } from 'react-native';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchProducts, Product } from '../Store/slices/productFormSlice';
@@ -108,10 +108,11 @@ const HomeScreen = React.memo(() => {
       >
         {/* Header */}
         <View className="px-4 py-3 flex-row items-center justify-between">
-          <View>
-            <Text className="text-2xl font-bold text-gray-900">Nemo</Text>
-            <Text className="text-sm text-gray-500">Find your favorite products</Text>
-          </View>
+          <Image
+            source={require('../../assets/nemo-green.png')}
+            style={{ width: 100, height: 40 }}
+            resizeMode="contain"
+          />
           <TouchableOpacity className="bg-teal-50 p-3 rounded-full">
             <Ionicons name="notifications-outline" size={24} color="#0d9488" />
           </TouchableOpacity>
@@ -139,14 +140,14 @@ const HomeScreen = React.memo(() => {
         {/* Banner Carousel */}
         <BannerCarousel />
 
+        {/* Flash Sale */}
+        <FlashSale products={products} />
+
         {/* Category Grid */}
         <CategoryGrid
           onCategoryPress={handleCategoryPress}
           selectedCategory={selectedCategory || undefined}
         />
-
-        {/* Flash Sale */}
-        <FlashSale products={products} />
 
         {/* Products Section */}
         <View className="px-4 mb-4">

@@ -74,7 +74,7 @@ const SignupScreen = () => {
                 <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
                     {/* Logo/Title */}
                     <View className="items-center mt-8 mb-8">
-                        <View className="w-20 h-20 bg-orange-500 rounded-full items-center justify-center mb-4">
+                        <View className="w-20 h-20 bg-teal-600 rounded-full items-center justify-center mb-4">
                             <Ionicons name="person-add" size={40} color="white" />
                         </View>
                         <Text className="text-3xl font-bold text-gray-900">Create Account</Text>
@@ -146,7 +146,7 @@ const SignupScreen = () => {
                     <TouchableOpacity
                         onPress={handleSignup}
                         disabled={loading}
-                        className={`bg-orange-500 py-4 rounded-xl shadow-lg shadow-orange-500/30 mb-4 ${loading ? 'opacity-50' : ''}`}
+                        className={`bg-teal-600 py-4 rounded-xl shadow-lg shadow-teal-600/30 mb-4 ${loading ? 'opacity-50' : ''}`}
                     >
                         <Text className="text-white text-center font-bold text-lg">
                             {loading ? 'Creating Account...' : 'Sign Up'}
@@ -157,7 +157,7 @@ const SignupScreen = () => {
                     <View className="flex-row justify-center mb-8">
                         <Text className="text-gray-600">Already have an account? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                            <Text className="text-orange-500 font-bold">Login</Text>
+                            <Text className="text-teal-600 font-bold">Login</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

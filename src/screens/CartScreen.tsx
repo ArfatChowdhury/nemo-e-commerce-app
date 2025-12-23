@@ -156,7 +156,7 @@ const CartScreen = () => {
                     </View>
                   )}
 
-                  <Text className="text-lg font-bold text-orange-600 mb-3">
+                  <Text className="text-lg font-bold text-teal-600 mb-3">
                     ${item.price}
                   </Text>
 
@@ -234,7 +234,7 @@ const CartScreen = () => {
 
             <View className="flex-row justify-between">
               <Text className="text-lg font-bold text-gray-900">Total</Text>
-              <Text className="text-lg font-bold text-orange-600">
+              <Text className="text-lg font-bold text-teal-600">
                 ${calculateTotal().toFixed(2)}
               </Text>
             </View>
@@ -246,7 +246,7 @@ const CartScreen = () => {
       <View className="px-4 pb-6 pt-4 bg-white border-t border-gray-200">
         <TouchableOpacity
           onPress={handleCheckout}
-          className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
+          className="bg-teal-600 py-4 rounded-2xl shadow-lg shadow-teal-600/30"
         >
           <Text className="text-white text-center font-bold text-lg">
             Proceed to Checkout - ${calculateTotal().toFixed(2)}

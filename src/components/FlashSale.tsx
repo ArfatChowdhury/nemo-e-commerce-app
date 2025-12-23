@@ -77,19 +77,19 @@ const FlashSale: React.FC<FlashSaleProps> = ({ products, onSeeAll }) => {
 
                 {/* Countdown Timer */}
                 <View className="flex-row items-center">
-                    <View className="bg-teal-600 px-2 py-1 rounded-md">
+                    <View className="bg-red-500 px-2 py-1 rounded-md">
                         <Text className="text-white font-bold text-sm">
                             {formatTime(timeLeft.hours)}
                         </Text>
                     </View>
-                    <Text className="text-teal-600 font-bold mx-1">:</Text>
-                    <View className="bg-teal-600 px-2 py-1 rounded-md">
+                    <Text className="text-red-500 font-bold mx-1">:</Text>
+                    <View className="bg-red-500 px-2 py-1 rounded-md">
                         <Text className="text-white font-bold text-sm">
                             {formatTime(timeLeft.minutes)}
                         </Text>
                     </View>
-                    <Text className="text-teal-600 font-bold mx-1">:</Text>
-                    <View className="bg-teal-600 px-2 py-1 rounded-md">
+                    <Text className="text-red-500 font-bold mx-1">:</Text>
+                    <View className="bg-red-500 px-2 py-1 rounded-md">
                         <Text className="text-white font-bold text-sm">
                             {formatTime(timeLeft.seconds)}
                         </Text>

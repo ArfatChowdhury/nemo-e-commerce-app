@@ -60,7 +60,7 @@ const LoginScreen = () => {
                 <View className="flex-1 px-6 justify-center">
                     {/* Logo/Title */}
                     <View className="items-center mb-8">
-                        <View className="w-20 h-20 bg-orange-500 rounded-full items-center justify-center mb-4">
+                        <View className="w-20 h-20 bg-teal-600 rounded-full items-center justify-center mb-4">
                             <Ionicons name="cart" size={40} color="white" />
                         </View>
                         <Text className="text-3xl font-bold text-gray-900">Welcome Back</Text>
@@ -102,7 +102,7 @@ const LoginScreen = () => {
                     <TouchableOpacity
                         onPress={handleLogin}
                         disabled={loading}
-                        className={`bg-orange-500 py-4 rounded-xl shadow-lg shadow-orange-500/30 ${loading ? 'opacity-50' : ''}`}
+                        className={`bg-teal-600 py-4 rounded-xl shadow-lg shadow-teal-600/30 ${loading ? 'opacity-50' : ''}`}
                     >
                         <Text className="text-white text-center font-bold text-lg">
                             {loading ? 'Logging in...' : 'Login'}
@@ -113,7 +113,7 @@ const LoginScreen = () => {
                     <View className="flex-row justify-center mt-6">
                         <Text className="text-gray-600">Don't have an account? </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                            <Text className="text-orange-500 font-bold">Sign Up</Text>
+                            <Text className="text-teal-600 font-bold">Sign Up</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

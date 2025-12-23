@@ -44,7 +44,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           {/* User Info Section */}
           <View className="bg-white m-4 p-6 rounded-2xl shadow-sm">
             <View className="items-center mb-4">
-              <View className="w-20 h-20 bg-orange-500 rounded-full items-center justify-center mb-3">
+              <View className="w-20 h-20 bg-teal-600 rounded-full items-center justify-center mb-3">
                 <Text className="text-white text-2xl font-bold">
                   {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
                 </Text>
@@ -91,7 +91,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <View className="flex-row mt-6 gap-3">
               <TouchableOpacity
                 onPress={() => navigation.navigate('Login')}
-                className="flex-1 bg-orange-500 py-3 rounded-xl"
+                className="flex-1 bg-teal-600 py-3 rounded-xl"
               >
                 <Text className="text-white text-center font-bold">Login</Text>
               </TouchableOpacity>
