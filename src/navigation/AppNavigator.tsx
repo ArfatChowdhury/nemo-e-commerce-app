@@ -23,6 +23,7 @@ import OrderHistoryScreen from "../screens/OrderHistoryScreen";
 import { RootStackParamList } from './types';
 import SignupScreen from '../screens/SignupScreen';
 import LoginScreen from '../screens/LoginScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 
 
 type TabParamList = {
@@ -40,7 +41,7 @@ function MyTabs() {
     return (
         <Tab.Navigator screenOptions={{
             headerShown: false,
-            tabBarActiveTintColor: '#f97316',
+            tabBarActiveTintColor: '#0d9488',
             tabBarInactiveTintColor: 'gray',
         }}>
             <Tab.Screen name="Home" component={HomeScreen} options={{
@@ -108,6 +109,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
+                <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     )

@@ -175,6 +175,16 @@ const productFormSlice = createSlice({
         },
         setOrderHistory: (state, action: PayloadAction<any>) => {
             state.orderHistory.push(action.payload);
+        },
+        checkoutSuccess: (state) => {
+            const newOrder = {
+                id: Math.random().toString(36).substr(2, 9),
+                date: new Date().toISOString(),
+                items: [...state.cartItems],
+                total: state.cartItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0)
+            };
+            state.orderHistory.push(newOrder);
+            state.cartItems = [];
         }
     }
 });
@@ -217,7 +227,8 @@ export const {
     clearCart,
     setWishlists,
     removeFromWishlist,
-    setOrderHistory
+    setOrderHistory,
+    checkoutSuccess
 } = productFormSlice.actions;
 
 export default productFormSlice.reducer;

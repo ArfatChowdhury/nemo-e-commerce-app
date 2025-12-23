@@ -147,7 +147,7 @@ const CheckoutScreen = () => {
 
                             <View className="flex-row justify-between">
                                 <Text className="text-lg font-bold text-gray-900">Total</Text>
-                                <Text className="text-lg font-bold text-orange-600">${totals.total.toFixed(2)}</Text>
+                                <Text className="text-lg font-bold text-teal-600">${totals.total.toFixed(2)}</Text>
                             </View>
                         </View>
                     </View>
@@ -159,7 +159,7 @@ const CheckoutScreen = () => {
             <View className="p-4 bg-white border-t border-gray-200">
                 <TouchableOpacity
                     onPress={handleProceedToPayment}
-                    className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
+                    className="bg-teal-600 py-4 rounded-2xl shadow-lg shadow-teal-600/30"
                 >
                     <Text className="text-white text-center font-bold text-lg">
                         Proceed to Payment

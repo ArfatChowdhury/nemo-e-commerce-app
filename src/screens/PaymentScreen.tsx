@@ -5,6 +5,8 @@ import HeaderBar from '../components/HeaderBar'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
+import { useDispatch } from 'react-redux'
+import { checkoutSuccess } from '../Store/slices/productFormSlice'
 import { RootStackParamList } from '../navigation/types'
 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>
@@ -14,6 +16,7 @@ const PaymentScreen = () => {
     const navigation = useNavigation<PaymentScreenNavigationProp>()
     const route = useRoute<PaymentScreenRouteProp>()
     const { shippingAddress, totals, cartItems } = route.params
+    const dispatch = useDispatch()
 
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card')
 
@@ -25,7 +28,7 @@ const PaymentScreen = () => {
     ]
 
     const handlePlaceOrder = () => {
-        // TODO: Implement order placement logic
+        dispatch(checkoutSuccess())
         alert('Order placed successfully!')
         // Navigate to order history or home
         navigation.navigate('bottomTabs')
@@ -48,28 +51,26 @@ const PaymentScreen = () => {
                             <TouchableOpacity
                                 key={method.id}
                                 onPress={() => setSelectedPaymentMethod(method.id)}
-                                className={`bg-white p-4 rounded-xl border-2 flex-row items-center ${
-                                    selectedPaymentMethod === method.id
-                                        ? 'border-orange-500 bg-orange-50'
-                                        : 'border-gray-200'
-                                }`}
+                                className={`bg-white p-4 rounded-xl border-2 flex-row items-center ${selectedPaymentMethod === method.id
+                                    ? 'border-teal-600 bg-teal-50'
+                                    : 'border-gray-200'
+                                    }`}
                             >
                                 <Ionicons
                                     name={method.icon}
                                     size={24}
-                                    color={selectedPaymentMethod === method.id ? '#f97316' : '#6b7280'}
+                                    color={selectedPaymentMethod === method.id ? '#0d9488' : '#6b7280'}
                                 />
                                 <Text
-                                    className={`flex-1 ml-3 text-base ${
-                                        selectedPaymentMethod === method.id
-                                            ? 'font-bold text-orange-600'
-                                            : 'text-gray-900'
-                                    }`}
+                                    className={`flex-1 ml-3 text-base ${selectedPaymentMethod === method.id
+                                        ? 'font-bold text-teal-600'
+                                        : 'text-gray-900'
+                                        }`}
                                 >
                                     {method.name}
                                 </Text>
                                 {selectedPaymentMethod === method.id && (
-                                    <Ionicons name="checkmark-circle" size={24} color="#f97316" />
+                                    <Ionicons name="checkmark-circle" size={24} color="#0d9488" />
                                 )}
                             </TouchableOpacity>
                         ))}
@@ -127,7 +128,7 @@ const PaymentScreen = () => {
 
                         <View className="flex-row justify-between">
                             <Text className="text-lg font-bold text-gray-900">Total</Text>
-                            <Text className="text-lg font-bold text-orange-600">${totals.total.toFixed(2)}</Text>
+                            <Text className="text-lg font-bold text-teal-600">${totals.total.toFixed(2)}</Text>
                         </View>
                     </View>
                 </View>
@@ -138,7 +139,7 @@ const PaymentScreen = () => {
             <View className="p-4 bg-white border-t border-gray-200">
                 <TouchableOpacity
                     onPress={handlePlaceOrder}
-                    className="bg-orange-500 py-4 rounded-2xl shadow-lg shadow-orange-500/30"
+                    className="bg-teal-600 py-4 rounded-2xl shadow-lg shadow-teal-600/30"
                 >
                     <Text className="text-white text-center font-bold text-lg">
                         Place Order

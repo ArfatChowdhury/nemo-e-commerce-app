@@ -13,5 +13,6 @@ export type RootStackParamList = {
     OrderHistory: undefined;
     Login: undefined;
     Signup: undefined;
+    EditProfile: undefined;
 
 };

@@ -248,13 +248,13 @@ const AddProductScreen = () => {
                 {formData.colors.map((c, i) => (
                   <View
                     key={i}
-                    className="flex-row items-center bg-blue-100 rounded-full px-3 py-2 mr-2 mb-2"
+                    className="flex-row items-center bg-teal-100 rounded-full px-3 py-2 mr-2 mb-2"
                   >
                     <View
                       style={{ backgroundColor: c.value }}
                       className="w-4 h-4 rounded-full mr-2 border"
                     />
-                    <Text className="text-blue-800">{c.name}</Text>
+                    <Text className="text-teal-800">{c.name}</Text>
                   </View>
                 ))}
               </View>
@@ -290,7 +290,7 @@ const AddProductScreen = () => {
           </View>
 
           {/* BUTTON FIXED */}
-          <TouchableOpacity className="bg-blue-500 py-4 rounded-lg mb-8" onPress={handleAdd}>
+          <TouchableOpacity className="bg-teal-600 py-4 rounded-lg mb-8" onPress={handleAdd}>
             <Text className="text-center text-white font-semibold text-lg">
               ADD PRODUCT
             </Text>

@@ -110,8 +110,8 @@ const CartScreen = () => {
           onPress={handleHeaderCheckout}
           className="flex-row items-center"
         >
-          <Ionicons name="card-outline" size={20} color="#f97316" />
-          <Text className="text-orange-500 font-medium ml-1">Checkout</Text>
+          <Ionicons name="card-outline" size={20} color="#0d9488" />
+          <Text className="text-teal-600 font-medium ml-1">Checkout</Text>
         </TouchableOpacity>
       </View>
 

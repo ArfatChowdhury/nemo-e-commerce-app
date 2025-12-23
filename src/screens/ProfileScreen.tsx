@@ -1,118 +1,95 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native'
 import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
-import ProfileButton from '../components/ProfileButton'
-import { StackNavigationProp } from '@react-navigation/stack'
 import { useAuth } from '../context/AuthContext'
-import { RootStackParamList } from '../navigation/types'
 
-type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
-
-interface ProfileScreenProps {
-  navigation: ProfileScreenNavigationProp;
-}
-
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const { user, logOut, loading } = useAuth();
+const ProfileScreen = () => {
+  const navigation = useNavigation<any>()
+  const { user, logOut } = useAuth()
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logOut();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-            }
-          }
-        }
-      ]
-    );
-  };
+    try {
+      await logOut()
+    } catch (error: any) {
+      Alert.alert('Error', error.message)
+    }
+  }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {user ? (
-        // Logged in view
-        <View className="flex-1">
-          {/* User Info Section */}
-          <View className="bg-white m-4 p-6 rounded-2xl shadow-sm">
-            <View className="items-center mb-4">
-              <View className="w-20 h-20 bg-teal-600 rounded-full items-center justify-center mb-3">
-                <Text className="text-white text-2xl font-bold">
-                  {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
-                </Text>
-              </View>
-              <Text className="text-xl font-bold text-gray-900">
-                {user.displayName || 'User'}
-              </Text>
-              <Text className="text-gray-500 text-sm mt-1">{user.email}</Text>
-            </View>
-          </View>
-
-          {/* Menu Options */}
-          <View>
-            <ProfileButton iconName='bag-handle-outline' name='Product Management' onPress={() => navigation.navigate('productManagement')} />
-            <ProfileButton name='Wishlist' iconName='heart-outline' onPress={() => navigation.navigate('Wishlist')} />
-            <ProfileButton iconName='receipt-outline' name='Order History' onPress={() => navigation.navigate('OrderHistory')} />
-          </View>
-
-          {/* Logout Button */}
-          <View className="mx-4 mt-4">
-            <TouchableOpacity
-              onPress={handleLogout}
-              className="bg-red-500 py-4 rounded-xl flex-row items-center justify-center"
-            >
-              <Ionicons name="log-out-outline" size={20} color="white" />
-              <Text className="text-white font-bold text-base ml-2">Logout</Text>
-            </TouchableOpacity>
-          </View>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1 px-6 pt-6">
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-8">
+          <Text className="text-2xl font-bold text-gray-900">Profile</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+            <Ionicons name="settings-outline" size={24} color="#374151" />
+          </TouchableOpacity>
         </View>
-      ) : (
-        // Logged out view  
-        <View className="flex-1">
-          {/* User Info Section */}
-          <View className="bg-white m-4 p-6 rounded-2xl shadow-sm">
-            <View className="items-center">
-              <View className="w-20 h-20 bg-gray-200 rounded-full items-center justify-center mb-3">
-                <Ionicons name="person-outline" size={40} color="#9CA3AF" />
-              </View>
-              <Text className="text-xl font-bold text-gray-900">Guest User</Text>
-              <Text className="text-gray-500 text-sm mt-1">Sign in to access all features</Text>
-            </View>
 
-            {/* Login/Signup Buttons */}
-            <View className="flex-row mt-6 gap-3">
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Login')}
-                className="flex-1 bg-teal-600 py-3 rounded-xl"
-              >
-                <Text className="text-white text-center font-bold">Login</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Signup')}
-                className="flex-1 bg-gray-200 py-3 rounded-xl"
-              >
-                <Text className="text-gray-700 text-center font-bold">Sign Up</Text>
-              </TouchableOpacity>
-            </View>
+        {/* User Info */}
+        <View className="items-center mb-8">
+          <View className="w-24 h-24 bg-teal-600 rounded-full items-center justify-center mb-4 shadow-sm">
+            <Text className="text-white text-3xl font-bold">
+              {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+            </Text>
           </View>
-
-          {/* Menu Options */}
-          <View>
-            <ProfileButton iconName='bag-handle-outline' name='Product Management' onPress={() => navigation.navigate('productManagement')} />
-            <ProfileButton name='Wishlist' iconName='heart-outline' onPress={() => navigation.navigate('Wishlist')} />
-            <ProfileButton iconName='receipt-outline' name='Order History' onPress={() => navigation.navigate('OrderHistory')} />
-          </View>
+          <Text className="text-xl font-bold text-gray-900">
+            {user?.displayName || 'User'}
+          </Text>
+          <Text className="text-gray-500">{user?.email}</Text>
         </View>
-      )}
-    </View>
+
+        {/* Menu Items */}
+        <View className="bg-white rounded-2xl p-4 shadow-sm mb-6">
+          <TouchableOpacity
+            className="flex-row items-center py-4 border-b border-gray-100"
+            onPress={() => navigation.navigate('EditProfile')}
+          >
+            <View className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center mr-4">
+              <Ionicons name="person-outline" size={20} color="#0d9488" />
+            </View>
+            <Text className="flex-1 text-gray-700 font-medium">Edit Profile</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center py-4 border-b border-gray-100"
+            onPress={() => navigation.navigate('OrderHistory')}
+          >
+            <View className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center mr-4">
+              <Ionicons name="time-outline" size={20} color="#0d9488" />
+            </View>
+            <Text className="flex-1 text-gray-700 font-medium">Order History</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center py-4"
+            onPress={() => navigation.navigate('Wishlist')}
+          >
+            <View className="w-10 h-10 bg-teal-50 rounded-full items-center justify-center mr-4">
+              <Ionicons name="heart-outline" size={20} color="#0d9488" />
+            </View>
+            <Text className="flex-1 text-gray-700 font-medium">Wishlist</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Logout Button */}
+        <TouchableOpacity
+          className="flex-row items-center bg-white p-4 rounded-2xl shadow-sm mb-8"
+          onPress={handleLogout}
+        >
+          <View className="w-10 h-10 bg-red-50 rounded-full items-center justify-center mr-4">
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+          </View>
+          <Text className="flex-1 text-red-500 font-medium">Log Out</Text>
+        </TouchableOpacity>
+
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
