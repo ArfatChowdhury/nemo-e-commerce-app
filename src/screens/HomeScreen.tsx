@@ -1,253 +1,187 @@
-import { View, Text, TextInput, VirtualizedList, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native'
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
-import ProductCard from '../components/ProductCard'
-import { fetchProducts, Product } from '../Store/slices/productFormSlice'
-import { useAppDispatch, useAppSelector } from '../Store/hooks'
-import { Ionicons } from '@expo/vector-icons'
-import ProductGridSkeleton from '../components/ProductGridSkeleton'
-
-const ITEMS_PER_PAGE = 10
-const NUM_COLUMNS = 2
+import { View, Text, TextInput, ScrollView, RefreshControl, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { fetchProducts, Product } from '../Store/slices/productFormSlice';
+import { useAppDispatch, useAppSelector } from '../Store/hooks';
+import { Ionicons } from '@expo/vector-icons';
+import ProductGridSkeleton from '../components/ProductGridSkeleton';
+import BannerCarousel from '../components/BannerCarousel';
+import FlashSale from '../components/FlashSale';
+import CategoryGrid from '../components/CategoryGrid';
+import ProductCard from '../components/ProductCard';
 
 const HomeScreen = React.memo(() => {
-  const loading = useAppSelector(state => state.productForm.loading)
-  const products = useAppSelector(state => state.productForm.products)
-  const error = useAppSelector(state => state.productForm.error)
-  const dispatch = useAppDispatch()
+  const loading = useAppSelector((state) => state.productForm.loading);
+  const products = useAppSelector((state) => state.productForm.products);
+  const error = useAppSelector((state) => state.productForm.error);
+  const dispatch = useAppDispatch();
 
-  const [selectedCategory, setSelectedCategory] = useState('Trending')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
-  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(fetchProducts());
+    setTimeout(() => setRefreshing(false), 1000);
+  }, [dispatch]);
 
-  const { categories, uniqueCategories } = useMemo(() => {
-    const categoryList = products ? products.map(cat => cat.category) : []
-    const uniqueCats = [...new Set(categoryList)]
-    return { categories: categoryList, uniqueCategories: uniqueCats }
-  }, [products])
-
+  // Filter products based on search and category
   const filteredProducts = useMemo(() => {
-    if (!products) return []
-    if (selectedCategory === 'Trending') return products
-    return products.filter(product => product.category === selectedCategory)
-  }, [selectedCategory, products])
+    if (!products) return [];
 
-  const searchedProducts = useMemo(() => {
-    if (!products) return []
-    if (!searchQuery) return []
-    const query = searchQuery.toLowerCase()
-    return products.filter(product =>
-      product.productName?.toLowerCase().includes(query) ||
-      product.description?.toLowerCase().includes(query)
-    )
-  }, [products, searchQuery])
+    let result = products;
 
-
-  const finalProducts = useMemo(() => {
-    return searchQuery ? searchedProducts : filteredProducts
-  }, [searchQuery, searchedProducts, filteredProducts])
-
-  useEffect(() => {
-    dispatch(fetchProducts())
-  }, [dispatch])
-
-
-  useEffect(() => {
-    if (finalProducts.length > 0) {
-      const initialProducts = finalProducts.slice(0, ITEMS_PER_PAGE)
-      setDisplayedProducts(initialProducts)
-      setHasMore(finalProducts.length > ITEMS_PER_PAGE)
-      setCurrentPage(1)
-    } else {
-      setDisplayedProducts([])
-      setHasMore(false)
+    // Filter by category
+    if (selectedCategory) {
+      result = result.filter((p) => p.category === selectedCategory);
     }
-  }, [finalProducts])
 
-  const loadMore = useCallback(() => {
-    if (loadingMore || !hasMore) return
+    // Filter by search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.productName?.toLowerCase().includes(query) ||
+          p.description?.toLowerCase().includes(query) ||
+          p.brandName?.toLowerCase().includes(query)
+      );
+    }
 
-    setLoadingMore(true)
-
-    setTimeout(() => {
-      const nextPage = currentPage + 1
-      const endIndex = nextPage * ITEMS_PER_PAGE
-      const newProducts = finalProducts.slice(0, endIndex)
-
-      setDisplayedProducts(newProducts)
-      setCurrentPage(nextPage)
-      setHasMore(endIndex < finalProducts.length)
-      setLoadingMore(false)
-    }, 500)
-  }, [currentPage, loadingMore, hasMore, finalProducts])
+    return result;
+  }, [products, searchQuery, selectedCategory]);
 
   const handleCategoryPress = useCallback((category: string) => {
-    setSelectedCategory(category)
-  }, [])
+    setSelectedCategory((prev) => (prev === category ? null : category));
+  }, []);
 
-  const handleProductPress = useCallback((product: Product) => {
-    console.log('Product pressed:', product)
-    // navigation.navigate('ProductDetails', { product })
-  }, [])
-
-  const renderCategoryItem = useCallback(({ item }: { item: string }) => (
-    <View className={`mr-3 rounded-lg shadow-sm ${selectedCategory === item ? 'bg-orange-500' : 'bg-white'
-      }`}>
-      <TouchableOpacity
-        onPress={() => handleCategoryPress(item)}
-        className="p-4"
+  const renderProductItem = useCallback(
+    ({ item, index }: { item: Product; index: number }) => (
+      <View
+        style={{ width: '48%' }}
+        className={index % 2 === 0 ? 'mr-2' : 'ml-2'}
       >
-        <Text className={`text-base font-medium ${selectedCategory === item ? 'text-white' : 'text-gray-900'
-          }`}>
-          {item}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  ), [handleCategoryPress, selectedCategory])
-
-  const keyCategoryExtractor = useCallback((item: string, index: number) => index.toString(), [])
-
-
-  const getItemCount = useCallback(() => {
-    return Math.ceil(displayedProducts.length / NUM_COLUMNS)
-  }, [displayedProducts.length])
-
-  const getItem = useCallback((data: Product[], index: number) => {
-    const rowIndex = index
-    const firstProduct = displayedProducts[rowIndex * NUM_COLUMNS]
-    const secondProduct = displayedProducts[rowIndex * NUM_COLUMNS + 1]
-
-    return {
-      firstProduct,
-      secondProduct,
-      rowIndex
-    }
-  }, [displayedProducts])
-
-  const renderItem = useCallback(({ item }: { item: { firstProduct: Product, secondProduct: Product, rowIndex: number } }) => {
-    return (
-      <View className="flex-row justify-between px-2 mb-4">
-        {/* First Product */}
-        <View className="w-[48%]">
-          {item.firstProduct && (
-            <ProductCard
-              item={item.firstProduct}
-              onPress={handleProductPress}
-            />
-          )}
-        </View>
-
-        {/* Second Product */}
-        <View className="w-[48%]">
-          {item.secondProduct && (
-            <ProductCard
-              item={item.secondProduct}
-              onPress={handleProductPress}
-            />
-          )}
-        </View>
+        <ProductCard item={item} />
       </View>
-    )
-  }, [handleProductPress])
+    ),
+    []
+  );
 
-  const renderFooter = useCallback(() => {
-    if (!loadingMore) return null
-
-    return (
-      <View className="py-4">
-        <ProductGridSkeleton
-          itemsCount={2}
-          columns={2}
-          showSearchAndCategories={false}
-        />
-      </View>
-    )
-  }, [loadingMore])
-
-  const renderEmptyComponent = useCallback(() => {
-    return (
-      <View className="flex-1 justify-center items-center mt-20">
-        <Text className="text-gray-500 text-lg">No products found</Text>
-      </View>
-    )
-  }, [])
-
-  if (loading && displayedProducts.length === 0) {
-    return (
-      <ProductGridSkeleton itemsCount={6} />
-    )
+  if (loading && products.length === 0) {
+    return <ProductGridSkeleton itemsCount={6} />;
   }
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center px-4">
+      <View className="flex-1 justify-center items-center px-4 bg-gray-50">
         <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
-        <Text className="text-red-500 text-lg font-semibold mt-4 text-center">Error loading products</Text>
+        <Text className="text-red-500 text-lg font-semibold mt-4 text-center">
+          Error loading products
+        </Text>
         <Text className="text-gray-600 mt-2 text-center">{error}</Text>
+        <TouchableOpacity
+          onPress={onRefresh}
+          className="mt-4 bg-teal-600 px-6 py-3 rounded-xl"
+        >
+          <Text className="text-white font-bold">Try Again</Text>
+        </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Search Bar */}
-      <View className='flex flex-row items-center bg-white border border-gray-300 rounded-full px-4 py-3 mx-4 my-4 shadow-sm'>
-        <Ionicons name='search' size={24} color='#6B7280' />
-        <TextInput
-          placeholder='Search desire product'
-          className='flex-1 text-base ml-2'
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#0d9488']}
+            tintColor="#0d9488"
+          />
+        }
+      >
+        {/* Header */}
+        <View className="px-4 py-3 flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-900">Nemo</Text>
+            <Text className="text-sm text-gray-500">Find your favorite products</Text>
+          </View>
+          <TouchableOpacity className="bg-teal-50 p-3 rounded-full">
+            <Ionicons name="notifications-outline" size={24} color="#0d9488" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View className="mx-4 mb-4">
+          <View className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
+            <Ionicons name="search" size={22} color="#6B7280" />
+            <TextInput
+              placeholder="Search products..."
+              className="flex-1 text-base ml-3"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#9CA3AF"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Banner Carousel */}
+        <BannerCarousel />
+
+        {/* Category Grid */}
+        <CategoryGrid
+          onCategoryPress={handleCategoryPress}
+          selectedCategory={selectedCategory || undefined}
         />
-      </View>
 
-      {/* Categories */}
-      <View className="h-20">
-        <FlatList
-          data={['Trending', ...uniqueCategories]}
-          keyExtractor={keyCategoryExtractor}
-          renderItem={renderCategoryItem}
-          horizontal={true}
-          showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10 }}
-        />
-      </View>
+        {/* Flash Sale */}
+        <FlashSale products={products} />
 
-      {/* Products */}
-      <View className="flex-1 px-2">
-        <Text className="text-lg font-bold mb-3 px-2">Products in {selectedCategory}</Text>
-        <VirtualizedList
-          data={displayedProducts}
-          getItemCount={getItemCount}
-          getItem={getItem}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `row-${index}`}
-          showsVerticalScrollIndicator={false}
-          initialNumToRender={5}
-          maxToRenderPerBatch={5}
-          windowSize={5}
-          removeClippedSubviews={true}
-          ListEmptyComponent={renderEmptyComponent}
-          ListFooterComponent={renderFooter}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.3}
-          contentContainerStyle={{
-            paddingVertical: 8,
-            paddingBottom: 20
-          }}
-        />
-      </View>
-    </View>
-  )
-})
+        {/* Products Section */}
+        <View className="px-4 mb-4">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-lg font-bold text-gray-900">
+              {selectedCategory || 'All Products'}
+            </Text>
+            <TouchableOpacity>
+              <Text className="text-teal-600 font-medium text-sm">See All</Text>
+            </TouchableOpacity>
+          </View>
 
+          {/* Products Grid */}
+          {filteredProducts.length === 0 ? (
+            <View className="py-10 items-center">
+              <Ionicons name="search-outline" size={48} color="#9CA3AF" />
+              <Text className="text-gray-500 mt-3 text-center">
+                No products found
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredProducts}
+              renderItem={renderProductItem}
+              keyExtractor={(item) => item._id}
+              numColumns={2}
+              scrollEnabled={false}
+              contentContainerStyle={{ gap: 16 }}
+              columnWrapperStyle={{ justifyContent: 'space-between' }}
+            />
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+});
 
-export default HomeScreen
-
-
-
-
+export default HomeScreen;
