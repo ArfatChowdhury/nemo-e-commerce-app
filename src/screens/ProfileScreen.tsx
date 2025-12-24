@@ -1,13 +1,54 @@
 import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuth } from '../context/AuthContext'
+import * as Updates from 'expo-updates'
 
 const ProfileScreen = () => {
   const navigation = useNavigation<any>()
   const { user, logOut, role } = useAuth()
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
+
+  const checkForUpdate = async () => {
+    try {
+      if (__DEV__) {
+        Alert.alert('Development Mode', 'Updates are not supported in development mode.')
+        return
+      }
+
+      setIsCheckingUpdate(true)
+      const update = await Updates.checkForUpdateAsync()
+
+      if (update.isAvailable) {
+        Alert.alert(
+          'Update Available',
+          'A new version of the app is available. Would you like to update now?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Update',
+              onPress: async () => {
+                try {
+                  await Updates.fetchUpdateAsync()
+                  await Updates.reloadAsync()
+                } catch (e: any) {
+                  Alert.alert('Error', 'Failed to fetch update: ' + e.message)
+                }
+              }
+            }
+          ]
+        )
+      } else {
+        Alert.alert('No Updates', 'You are already on the latest version.')
+      }
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to check for updates: ' + error.message)
+    } finally {
+      setIsCheckingUpdate(false)
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -120,7 +161,7 @@ const ProfileScreen = () => {
         {/* Logout Button (Only if logged in) */}
         {user && (
           <TouchableOpacity
-            className="flex-row items-center bg-white p-4 rounded-2xl shadow-sm mb-8"
+            className="flex-row items-center bg-white p-4 rounded-2xl shadow-sm mb-6"
             onPress={handleLogout}
           >
             <View className="w-10 h-10 bg-red-50 rounded-full items-center justify-center mr-4">
@@ -129,6 +170,16 @@ const ProfileScreen = () => {
             <Text className="flex-1 text-red-500 font-medium">Log Out</Text>
           </TouchableOpacity>
         )}
+
+        {/* App Info & Updates */}
+        <View className="items-center mb-8">
+          <TouchableOpacity onPress={checkForUpdate} disabled={isCheckingUpdate}>
+            <Text className="text-gray-400 text-sm">
+              {isCheckingUpdate ? 'Checking for updates...' : 'Check for Updates'}
+            </Text>
+          </TouchableOpacity>
+          <Text className="text-gray-300 text-xs mt-1">v1.0.0</Text>
+        </View>
 
       </ScrollView>
     </SafeAreaView>

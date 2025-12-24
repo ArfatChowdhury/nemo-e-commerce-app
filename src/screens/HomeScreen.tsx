@@ -18,7 +18,7 @@ const HomeScreen = React.memo(() => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('Trending');
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -37,7 +37,7 @@ const HomeScreen = React.memo(() => {
     let result = products;
 
     // Filter by category
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'Trending') {
       result = result.filter((p) => p.category === selectedCategory);
     }
 
@@ -56,7 +56,7 @@ const HomeScreen = React.memo(() => {
   }, [products, searchQuery, selectedCategory]);
 
   const handleCategoryPress = useCallback((category: string) => {
-    setSelectedCategory((prev) => (prev === category ? null : category));
+    setSelectedCategory((prev) => (prev === category ? 'Trending' : category));
   }, []);
 
   const renderProductItem = useCallback(

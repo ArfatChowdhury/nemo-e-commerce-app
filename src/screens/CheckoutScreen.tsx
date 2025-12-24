@@ -48,16 +48,11 @@ const CheckoutScreen = () => {
             return
         }
 
-        if (user) {
-            navigation.navigate('Payment', {
-                shippingAddress: formData,
-                totals: totals,
-                cartItems: cartItems
-            })
-        } else {
-            // Redirect to Login if not authenticated
-            navigation.navigate('Login')
-        }
+        navigation.navigate('Payment', {
+            shippingAddress: formData,
+            totals: totals,
+            cartItems: cartItems
+        })
     }
 
     return (

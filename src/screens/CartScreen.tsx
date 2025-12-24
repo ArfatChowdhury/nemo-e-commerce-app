@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { useAppSelector } from '../Store/hooks'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../navigation/types'
+import { useAuth } from '../context/AuthContext'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
@@ -16,6 +16,7 @@ const CartScreen = () => {
   const dispatch = useDispatch()
   const navigation = useNavigation<NavigationProp>()
   const cartItems = useAppSelector(state => state.productForm.cartItems)
+  const { user } = useAuth()
 
 
   const calculateSubtotal = () => {
@@ -65,7 +66,13 @@ const CartScreen = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Checkout",
-          onPress: () => navigation.navigate('Checkout')
+          onPress: () => {
+            if (user) {
+              navigation.navigate('Checkout')
+            } else {
+              navigation.navigate('Login')
+            }
+          }
         }
       ]
     )
@@ -77,7 +84,11 @@ const CartScreen = () => {
       return
     }
 
-    navigation.navigate('Checkout')
+    if (user) {
+      navigation.navigate('Checkout')
+    } else {
+      navigation.navigate('Login')
+    }
   }
 
   if (cartItems.length === 0) {

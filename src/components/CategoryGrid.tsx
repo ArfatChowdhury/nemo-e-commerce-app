@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Category data with icons
 const categories = [
+    { name: 'Trending', icon: 'flame-outline', color: '#0d9488' },
     { name: 'Electronics', icon: 'laptop-outline', color: '#0d9488' },
     { name: 'Fashion', icon: 'shirt-outline', color: '#0d9488' },
     { name: 'Home & Kitchen', icon: 'home-outline', color: '#0d9488' },
