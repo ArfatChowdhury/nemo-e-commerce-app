@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
@@ -11,10 +11,12 @@ const ProfileScreen = () => {
   const { user, logOut, role } = useAuth()
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
 
-  const checkForUpdate = async () => {
+  const checkForUpdate = async (showAlerts = false) => {
     try {
       if (__DEV__) {
-        Alert.alert('Development Mode', 'Updates are not supported in development mode.')
+        if (showAlerts) {
+          Alert.alert('Development Mode', 'Updates are not supported in development mode.')
+        }
         return
       }
 
@@ -22,33 +24,37 @@ const ProfileScreen = () => {
       const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
-        Alert.alert(
-          'Update Available',
-          'A new version of the app is available. Would you like to update now?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Update',
-              onPress: async () => {
-                try {
-                  await Updates.fetchUpdateAsync()
-                  await Updates.reloadAsync()
-                } catch (e: any) {
-                  Alert.alert('Error', 'Failed to fetch update: ' + e.message)
-                }
-              }
-            }
-          ]
-        )
+        // Automatically fetch and apply the update
+        try {
+          await Updates.fetchUpdateAsync()
+          // Reload the app to apply the update
+          await Updates.reloadAsync()
+        } catch (e: any) {
+          // Only show error alert if user manually triggered the check
+          if (showAlerts) {
+            Alert.alert('Error', 'Failed to fetch update: ' + e.message)
+          }
+        }
       } else {
-        Alert.alert('No Updates', 'You are already on the latest version.')
+        // Only show "no updates" message if user manually triggered the check
+        if (showAlerts) {
+          Alert.alert('No Updates', 'You are already on the latest version.')
+        }
       }
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to check for updates: ' + error.message)
+      // Only show error alert if user manually triggered the check
+      if (showAlerts) {
+        Alert.alert('Error', 'Failed to check for updates: ' + error.message)
+      }
     } finally {
       setIsCheckingUpdate(false)
     }
   }
+
+  // Automatically check for updates when component mounts
+  useEffect(() => {
+    checkForUpdate(false) // false = don't show alerts for automatic checks
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -173,7 +179,7 @@ const ProfileScreen = () => {
 
         {/* App Info & Updates */}
         <View className="items-center mb-8">
-          <TouchableOpacity onPress={checkForUpdate} disabled={isCheckingUpdate}>
+          <TouchableOpacity onPress={() => checkForUpdate(true)} disabled={isCheckingUpdate}>
             <Text className="text-gray-400 text-sm">
               {isCheckingUpdate ? 'Checking for updates...' : 'Check for Updates'}
             </Text>
