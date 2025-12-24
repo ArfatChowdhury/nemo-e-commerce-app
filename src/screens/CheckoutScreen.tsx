@@ -6,12 +6,14 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useAppSelector } from '../Store/hooks'
 import { RootStackParamList } from '../navigation/types'
+import { useAuth } from '../context/AuthContext'
 
 type CheckoutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Checkout'>
 
 const CheckoutScreen = () => {
     const navigation = useNavigation<CheckoutScreenNavigationProp>()
     const cartItems = useAppSelector((state: any) => state.productForm.cartItems)
+    const { user } = useAuth()
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -46,11 +48,16 @@ const CheckoutScreen = () => {
             return
         }
 
-        navigation.navigate('Payment', {
-            shippingAddress: formData,
-            totals: totals,
-            cartItems: cartItems
-        })
+        if (user) {
+            navigation.navigate('Payment', {
+                shippingAddress: formData,
+                totals: totals,
+                cartItems: cartItems
+            })
+        } else {
+            // Redirect to Login if not authenticated
+            navigation.navigate('Login')
+        }
     }
 
     return (
