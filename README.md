@@ -57,31 +57,74 @@ The backend server for this application can be found here:
     ```
 
 3.  **Start the app**:
+    Nemo — E‑commerce Mobile App
+
+    Nemo is a React Native + Expo mobile storefront showcasing a complete shopping experience: browse products, manage cart & wishlist, and run a built-in product management flow. The app uses NativeWind (Tailwind) for styling and Redux Toolkit for state.
+
+    **Status:** Example / demo app (Expo SDK 52)
+
+    **Key features**
+    - Product browsing and detailed product pages
+    - Cart, wishlist, and checkout flow (UI-level)
+    - Product management screens (add / edit products)
+    - Firebase integration helpers and image picker utilities
+
+    **Tech stack**
+    - React Native + Expo
+    - TypeScript / JavaScript
+    - Redux Toolkit (store under `src/Store`)
+    - React Navigation (stack & tabs)
+    - NativeWind (Tailwind for RN) + TailwindCSS tooling
+    - Firebase (client SDK)
+
+    ## Getting started
+
+    ### Prerequisites
+    - Node.js (16+ recommended)
+    - Expo CLI (optional) or use `npx expo`
+    - For device testing: Expo Go on iOS/Android
+
+    ### Install
     ```bash
-    npx expo start --clear
+    git clone https://github.com/ArfatChowdhury/nemo-e-commerce-app.git
+    cd nemo-e-commerce-app
+    npm install
     ```
 
-4.  **Run on Device**:
-    -   Scan the QR code with your Android (Expo Go) or iOS (Camera) device.
+    ### Run
+    - Start Metro / Expo:
+    ```bash
+    npx expo start
+    ```
+    - Run on Android / iOS / Web using the Expo UI or:
+    ```bash
+    npm run android
+    npm run ios
+    npm run web
+    ```
 
-## 📂 Project Structure
+    Scripts available (from `package.json`): `start`, `android`, `ios`, `web`.
 
-```
-src/
-├── components/      # Reusable UI components (Cards, Headers, Buttons)
-├── navigation/      # Stack and Tab navigators
-├── screens/         # Application screens (Home, Cart, Profile, etc.)
-├── Store/           # Redux slices and store configuration
-├── constants/       # App constants and API config
-└── ...
-```
+    ## Project layout
+    ```
+    .
+    ├─ App.tsx                 # App entry (providers, splash, navigator)
+    ├─ index.tsx               # Expo registerRootComponent
+    ├─ assets/                 # images and static assets
+    ├─ src/
+    │  ├─ components/         # presentational components (ProductCard, Header, etc.)
+    │  ├─ navigation/         # AppNavigator and route types
+    │  ├─ screens/            # Screens (Home, ProductDetails, Cart, Profile...)
+    │  ├─ Store/              # Redux store and slices
+    │  └─ constants/          # API config and app constants
+    ```
 
-## 🔮 Future Improvements
+    ## Configuration notes
+    - Firebase config lives under `src/constants/firebase.ts` — supply your own project keys for auth/database usage.
+    - Environment variables: the project uses `dotenv` in dev; follow your own workflow to load `.env` values if needed.
 
--   [ ] **User Authentication**: Re-integrate Firebase for secure Login/Signup.
--   [ ] **Payment Gateway**: Integrate Stripe or PayPal for real payments.
--   [ ] **Push Notifications**: Order updates and promo alerts.
-
----
-
-Made with ❤️ by Arfat Chowdhury
+    ## Contributing & next steps
+    - This repo is a demo/sample. If you want to adapt it:
+      - Wire a production backend (API, payments)
+      - Add real user auth and secure endpoints
+      - Harden forms and add validations where necessary
